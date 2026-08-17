@@ -1,0 +1,4 @@
+ImportError while loading conftest '/home/runner/work/rescind/rescind/tests/conftest.py'.
+tests/conftest.py:19: in <module>
+    from rescind.config import EMBED_DIM
+E   ModuleNotFoundError: No module named 'rescind'
