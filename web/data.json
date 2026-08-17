@@ -2,8 +2,8 @@
   "recorded_from": {
     "note": "Every value on this page was produced by scripts/record_demo.py running against a real CockroachDB cluster in CI. Nothing here is illustrative.",
     "cockroachdb_version": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
-    "commit": "684ee0ec9e1e685de1e24191def4e4cb48514c11",
-    "run_url": "https://github.com/phazon2/rescind/actions/runs/32068967961",
+    "commit": "602961e3185e6b543cd2b7708c4abcf1dc9fd41b",
+    "run_url": "https://github.com/phazon2/rescind/actions/runs/32069348407",
     "embeddings": "deterministic topic-anchored stand-ins, not AWS Titan -- see docs/LIMITS.md"
   },
   "thresholds": {
@@ -26,7 +26,7 @@
   "before": {
     "facts": [
       {
-        "id": "dda32c35-3e49-44c6-be48-10d0b0f0902b",
+        "id": "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef",
         "kind": "observation",
         "claim": "Certificate of Analysis for lot LOT-2026-0619-NV: Cronobacter sakazakii not detected in 30 of 30 sampled tins; lot passed release testing.",
         "source": "Northvale Dairy Co-op QA, CoA #4471, issued 2026-06-24",
@@ -34,7 +34,7 @@
         "retracted_reason": null
       },
       {
-        "id": "cf7572eb-e3db-4d73-8fe8-4046db942788",
+        "id": "518c97f7-a643-40aa-80a1-122e05091586",
         "kind": "observation",
         "claim": "Cold chain log for pallet NV-8841 held 2.1-6.8 C across the full 41-hour transit with no excursions, within specification throughout.",
         "source": "Carrier telemetry, sensor #NV-9134",
@@ -42,7 +42,7 @@
         "retracted_reason": null
       },
       {
-        "id": "b2780f9e-4542-47a9-80f4-624e0020164b",
+        "id": "70f3969f-c8ca-45f7-a6a5-b5bb0fe75dbb",
         "kind": "observation",
         "claim": "Supplier audit of Northvale Dairy Co-op closed 2026-05-14 with no major findings.",
         "source": "SGS third-party audit report #22-NV",
@@ -50,7 +50,7 @@
         "retracted_reason": null
       },
       {
-        "id": "e15d9ee9-f289-4d7d-aca8-6bd8185f5f21",
+        "id": "47b40e4b-4843-443f-9ac6-a224451f2bcc",
         "kind": "derived",
         "claim": "Northvale Dairy Co-op is a supplier in good standing.",
         "source": "rescind-agent: derived from supplier audit",
@@ -58,7 +58,7 @@
         "retracted_reason": null
       },
       {
-        "id": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2",
+        "id": "010967d3-8067-4965-b29c-1b9d3e20c9c4",
         "kind": "derived",
         "claim": "Lot LOT-2026-0619-NV meets microbiological release criteria.",
         "source": "rescind-agent: derived from CoA #4471 and cold chain telemetry",
@@ -66,7 +66,7 @@
         "retracted_reason": null
       },
       {
-        "id": "772622cb-5743-421b-acf1-38b5847ef065",
+        "id": "d9c56364-e10b-4051-bab0-ac3d88632dd8",
         "kind": "derived",
         "claim": "Lot LOT-2026-0619-NV is cleared for release to Meridian Foods DC-7.",
         "source": "rescind-agent: derived from release criteria and supplier standing",
@@ -75,34 +75,34 @@
       }
     ],
     "decision": {
-      "id": "dd2e43c0-fe60-4d11-abe7-f71a83b9d6ee",
+      "id": "b498ec8d-a0be-4b7d-b858-d6cf626d2a03",
       "question": "May we release lot LOT-2026-0619-NV to Meridian Foods DC-7?",
       "verdict": "release",
       "rationale": "Offline reasoning: every supporting record for this lot reports a passing result and none reports a recall or contamination finding.",
-      "decided_hlc": "1787000546314297516.0000000000",
+      "decided_hlc": "1787000813913463594.0000000000",
       "model_id": "offline-deterministic",
       "offline_mode": true,
       "supporting": [
         {
-          "id": "772622cb-5743-421b-acf1-38b5847ef065",
+          "id": "d9c56364-e10b-4051-bab0-ac3d88632dd8",
           "claim": "Lot LOT-2026-0619-NV is cleared for release to Meridian Foods DC-7.",
           "source": "rescind-agent: derived from release criteria and supplier standing",
           "distance": 0.201
         },
         {
-          "id": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2",
+          "id": "010967d3-8067-4965-b29c-1b9d3e20c9c4",
           "claim": "Lot LOT-2026-0619-NV meets microbiological release criteria.",
           "source": "rescind-agent: derived from CoA #4471 and cold chain telemetry",
           "distance": 0.242
         },
         {
-          "id": "cf7572eb-e3db-4d73-8fe8-4046db942788",
+          "id": "518c97f7-a643-40aa-80a1-122e05091586",
           "claim": "Cold chain log for pallet NV-8841 held 2.1-6.8 C across the full 41-hour transit with no excursions, within specification throughout.",
           "source": "Carrier telemetry, sensor #NV-9134",
           "distance": 0.3141
         },
         {
-          "id": "dda32c35-3e49-44c6-be48-10d0b0f0902b",
+          "id": "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef",
           "claim": "Certificate of Analysis for lot LOT-2026-0619-NV: Cronobacter sakazakii not detected in 30 of 30 sampled tins; lot passed release testing.",
           "source": "Northvale Dairy Co-op QA, CoA #4471, issued 2026-06-24",
           "distance": 0.3141
@@ -112,26 +112,26 @@
     "retrieval_plan": "distribution: local\nvectorized: true\n\n\u2022 top-k\n\u2502 order: +column16\n\u2502 k: 5\n\u2502\n\u2514\u2500\u2500 \u2022 render\n    \u2502\n    \u2514\u2500\u2500 \u2022 lookup join\n        \u2502 table: facts@facts_pkey\n        \u2502 equality: (id) = (id)\n        \u2502 equality cols are key\n        \u2502\n        \u2514\u2500\u2500 \u2022 vector search\n              table: facts@facts_live_by_lot\n              target count: 5\n              prefix spans: [/'LOT-2026-0619-NV'/false - /'LOT-2026-0619-NV'/false]\n\nindex recommendations: 1\n1. type: index creation\n   SQL command: CREATE INDEX ON rescind.public.facts (lot_id) STORING (claim, embedding, retracted);"
   },
   "retraction": {
-    "retraction_id": "01a267da-9e21-4020-a0d6-df4c8b6dac7d",
+    "retraction_id": "62775799-0b2b-490f-acd0-74020bc97f9a",
     "reason": "FDA Class II recall notice: Cronobacter sakazakii detected in a retained sample from the same production run. CoA #4471 withdrawn by Northvale QA.",
     "actor": "d.radrigan",
     "root_fact_ids": [
-      "dda32c35-3e49-44c6-be48-10d0b0f0902b"
+      "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef"
     ],
     "retracted_fact_ids": [
-      "772622cb-5743-421b-acf1-38b5847ef065",
-      "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2",
-      "dda32c35-3e49-44c6-be48-10d0b0f0902b"
+      "010967d3-8067-4965-b29c-1b9d3e20c9c4",
+      "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef",
+      "d9c56364-e10b-4051-bab0-ac3d88632dd8"
     ],
     "facts_retracted": 3,
     "cascade_beyond_roots": 2,
     "decisions_flagged": 1,
-    "retracted_hlc": "1787000546323455197.0000000000"
+    "retracted_hlc": "1787000813921118157.0000000000"
   },
   "after": {
     "facts": [
       {
-        "id": "dda32c35-3e49-44c6-be48-10d0b0f0902b",
+        "id": "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef",
         "kind": "observation",
         "claim": "Certificate of Analysis for lot LOT-2026-0619-NV: Cronobacter sakazakii not detected in 30 of 30 sampled tins; lot passed release testing.",
         "source": "Northvale Dairy Co-op QA, CoA #4471, issued 2026-06-24",
@@ -139,7 +139,7 @@
         "retracted_reason": "FDA Class II recall notice: Cronobacter sakazakii detected in a retained sample from the same production run. CoA #4471 withdrawn by Northvale QA."
       },
       {
-        "id": "cf7572eb-e3db-4d73-8fe8-4046db942788",
+        "id": "518c97f7-a643-40aa-80a1-122e05091586",
         "kind": "observation",
         "claim": "Cold chain log for pallet NV-8841 held 2.1-6.8 C across the full 41-hour transit with no excursions, within specification throughout.",
         "source": "Carrier telemetry, sensor #NV-9134",
@@ -147,7 +147,7 @@
         "retracted_reason": null
       },
       {
-        "id": "b2780f9e-4542-47a9-80f4-624e0020164b",
+        "id": "70f3969f-c8ca-45f7-a6a5-b5bb0fe75dbb",
         "kind": "observation",
         "claim": "Supplier audit of Northvale Dairy Co-op closed 2026-05-14 with no major findings.",
         "source": "SGS third-party audit report #22-NV",
@@ -155,7 +155,7 @@
         "retracted_reason": null
       },
       {
-        "id": "e15d9ee9-f289-4d7d-aca8-6bd8185f5f21",
+        "id": "47b40e4b-4843-443f-9ac6-a224451f2bcc",
         "kind": "derived",
         "claim": "Northvale Dairy Co-op is a supplier in good standing.",
         "source": "rescind-agent: derived from supplier audit",
@@ -163,7 +163,7 @@
         "retracted_reason": null
       },
       {
-        "id": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2",
+        "id": "010967d3-8067-4965-b29c-1b9d3e20c9c4",
         "kind": "derived",
         "claim": "Lot LOT-2026-0619-NV meets microbiological release criteria.",
         "source": "rescind-agent: derived from CoA #4471 and cold chain telemetry",
@@ -171,7 +171,7 @@
         "retracted_reason": "FDA Class II recall notice: Cronobacter sakazakii detected in a retained sample from the same production run. CoA #4471 withdrawn by Northvale QA."
       },
       {
-        "id": "772622cb-5743-421b-acf1-38b5847ef065",
+        "id": "d9c56364-e10b-4051-bab0-ac3d88632dd8",
         "kind": "derived",
         "claim": "Lot LOT-2026-0619-NV is cleared for release to Meridian Foods DC-7.",
         "source": "rescind-agent: derived from release criteria and supplier standing",
@@ -180,16 +180,16 @@
       }
     ],
     "decision": {
-      "id": "6128c9a9-62d8-4af5-bdb1-184004462fdc",
+      "id": "ebca5c9f-b82a-4912-a92e-7ca807682c3a",
       "question": "May we release lot LOT-2026-0619-NV to Meridian Foods DC-7?",
       "verdict": "refused",
       "rationale": "Refused: 1 live supporting record(s) within distance 0.55 for this lot, but 2 are required. Rescind will not answer from insufficient memory. Absence of evidence is not evidence of safety -- this lot is not cleared.",
-      "decided_hlc": "1787000546335831865.0000000000",
+      "decided_hlc": "1787000813929164345.0000000000",
       "model_id": "none-refused-before-model-call",
       "offline_mode": false,
       "supporting": [
         {
-          "id": "cf7572eb-e3db-4d73-8fe8-4046db942788",
+          "id": "518c97f7-a643-40aa-80a1-122e05091586",
           "claim": "Cold chain log for pallet NV-8841 held 2.1-6.8 C across the full 41-hour transit with no excursions, within specification throughout.",
           "source": "Carrier telemetry, sensor #NV-9134",
           "distance": 0.3141
@@ -198,18 +198,18 @@
     },
     "open_reviews": [
       {
-        "id": "dd2e43c0-fe60-4d11-abe7-f71a83b9d6ee",
+        "id": "b498ec8d-a0be-4b7d-b858-d6cf626d2a03",
         "lot_id": "LOT-2026-0619-NV",
         "question": "May we release lot LOT-2026-0619-NV to Meridian Foods DC-7?",
         "verdict": "release",
         "rationale": "Offline reasoning: every supporting record for this lot reports a passing result and none reports a recall or contamination finding.",
         "review_reason": "supporting memory retracted: FDA Class II recall notice: Cronobacter sakazakii detected in a retained sample from the same production run. CoA #4471 withdrawn by Northvale QA.",
-        "decided_at": "2026-08-17 21:02:26.314283+00:00"
+        "decided_at": "2026-08-17 21:06:53.913448+00:00"
       }
     ]
   },
   "replay": {
-    "decided_hlc": "1787000546314297516.0000000000",
+    "decided_hlc": "1787000813913463594.0000000000",
     "verdict_recorded": "release",
     "needs_review": true,
     "review_reason": "supporting memory retracted: FDA Class II recall notice: Cronobacter sakazakii detected in a retained sample from the same production run. CoA #4471 withdrawn by Northvale QA.",
@@ -254,24 +254,24 @@
   },
   "lineage": [
     {
-      "parent": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2",
-      "child": "772622cb-5743-421b-acf1-38b5847ef065"
+      "parent": "518c97f7-a643-40aa-80a1-122e05091586",
+      "child": "010967d3-8067-4965-b29c-1b9d3e20c9c4"
     },
     {
-      "parent": "e15d9ee9-f289-4d7d-aca8-6bd8185f5f21",
-      "child": "772622cb-5743-421b-acf1-38b5847ef065"
+      "parent": "59bf7f30-c74e-4fd7-baa3-8154d92ef4ef",
+      "child": "010967d3-8067-4965-b29c-1b9d3e20c9c4"
     },
     {
-      "parent": "cf7572eb-e3db-4d73-8fe8-4046db942788",
-      "child": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2"
+      "parent": "70f3969f-c8ca-45f7-a6a5-b5bb0fe75dbb",
+      "child": "47b40e4b-4843-443f-9ac6-a224451f2bcc"
     },
     {
-      "parent": "dda32c35-3e49-44c6-be48-10d0b0f0902b",
-      "child": "cd5cb6a0-c64e-49de-bfe5-c30f35e54db2"
+      "parent": "010967d3-8067-4965-b29c-1b9d3e20c9c4",
+      "child": "d9c56364-e10b-4051-bab0-ac3d88632dd8"
     },
     {
-      "parent": "b2780f9e-4542-47a9-80f4-624e0020164b",
-      "child": "e15d9ee9-f289-4d7d-aca8-6bd8185f5f21"
+      "parent": "47b40e4b-4843-443f-9ac6-a224451f2bcc",
+      "child": "d9c56364-e10b-4051-bab0-ac3d88632dd8"
     }
   ]
 }

@@ -1,9 +1,9 @@
 seeded lots and shipments
-  observation  coa             19885b46-4c0e-48f2-b023-39d1feb51d36
-  observation  cold_chain      c7c9d01f-e3ba-494e-89ea-469ca2b02dbb
-  observation  audit           68cfb5fa-0f6a-4c6d-b9e9-24a2e4332435
-  derived      good_standing   3ceade9e-69a1-4ae2-aecb-ef702756e740
-  derived      meets_criteria  f402edf8-1d6f-44f3-aa25-54571089c2dc
-  derived      cleared         9893bd81-e7ac-4d5f-b789-e84716a5480f
+  observation  coa             cef99b6e-d2a7-4ebc-9665-d6a2a7f8c38f
+  observation  cold_chain      72271845-ef9f-434a-b3e9-683ea59e3ff0
+  observation  audit           06615583-9684-412a-ad53-9d6510b49370
+  derived      good_standing   5855d73c-2e57-41d4-b8ea-5fd6f0a3cae4
+  derived      meets_criteria  5204f670-86d1-416f-b980-5def3a75c493
+  derived      cleared         c70992b6-211b-41d5-88fc-e2735d5a33ec
 
 6 facts, 5 lineage edges
