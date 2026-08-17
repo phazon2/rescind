@@ -112,10 +112,12 @@ def main() -> int:
     with connect() as conn:
         version = list(conn.execute("SELECT version() AS v").fetchone().values())[0]
         lot = conn.execute(
-            "SELECT * FROM lots WHERE lot_id = %s", (LOT,)
+            "SELECT lot_id, product_name, supplier, manufactured_on, status "
+            "FROM lots WHERE lot_id = %s", (LOT,)
         ).fetchone()
         shipment = conn.execute(
-            "SELECT * FROM shipments WHERE lot_id = %s", (LOT,)
+            "SELECT shipment_id, destination, units, status "
+            "FROM shipments WHERE lot_id = %s", (LOT,)
         ).fetchone()
 
         # --- 1. the agent answers -------------------------------------------
