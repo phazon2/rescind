@@ -136,7 +136,7 @@ jobs:
             [ -f "$f" ] && { tail -200 "$f" > "$f.trimmed" && mv "$f.trimmed" "$f"; }
           done
           for f in ci/latest.json ci/probe.json ci/run-seed.log ci/run-tests.log \
-                   ci/run-demo.log web/data.json; do
+                   ci/run-demo.log web/data.json web/data.js; do
             [ -f "$f" ] && git add -f "$f"
           done
           if git diff --cached --quiet; then

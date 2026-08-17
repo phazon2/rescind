@@ -228,8 +228,16 @@ def main() -> int:
         }
 
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2, default=str) + "\n")
+    serialised = json.dumps(payload, indent=2, default=str)
+    OUT.write_text(serialised + "\n")
     print(f"\nwrote {OUT}")
+
+    # Also emit the same payload as a script file. Loading the data via a <script>
+    # tag rather than fetch() means the demo page works when opened directly from
+    # disk and when served from any host, with no CORS dependency.
+    js = OUT.parent / "data.js"
+    js.write_text("window.RESCIND_DATA = " + serialised + ";\n")
+    print(f"wrote {js}")
 
     # Guard rails: if the recorded scenario stops telling the story, fail loudly
     # rather than shipping a demo page that quietly says nothing.
