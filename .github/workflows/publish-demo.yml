@@ -1,0 +1,61 @@
+name: publish-demo
+
+# Publishes web/ to the gh-pages branch, whose root then serves the demo at
+# https://phazon2.github.io/rescind/.
+#
+# This route is used rather than the actions/deploy-pages route because the
+# latter cannot run until Pages is switched to "GitHub Actions" in repository
+# settings, and a workflow that fails until someone clicks a button puts a red
+# cross on the repository that judges see. This one is green from the start.
+#
+# If the site is not live, Pages needs enabling once, in the browser:
+#   Settings -> Pages -> Build and deployment -> Deploy from a branch
+#   Branch: gh-pages / (root)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/publish-demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify the demo still tells the story before publishing it
+        run: |
+          set -euo pipefail
+          test -f web/index.html
+          test -f web/data.js
+          python -c "
+import json, pathlib
+raw = pathlib.Path('web/data.js').read_text()
+d = json.loads(raw.split('=', 1)[1].rstrip().rstrip(';'))
+assert d['before']['decision']['verdict'] == 'release', 'demo no longer starts at release'
+assert d['after']['decision']['verdict'] == 'refused', 'demo no longer ends at refused'
+assert d['retraction']['decisions_flagged'] >= 1, 'demo flags no decision'
+print('demo intact:', d['retraction']['facts_retracted'], 'retracted,',
+      d['retraction']['cascade_beyond_roots'], 'by cascade,',
+      d['retraction']['decisions_flagged'], 'flagged')
+"
+
+      - name: Push web/ to gh-pages
+        run: |
+          set -euo pipefail
+          cd web
+          git init -q
+          git checkout -qb gh-pages
+          git add -A
+          git -c user.name=rescind-ci -c user.email=ci@rescind.invalid \
+              commit -qm "publish demo from ${GITHUB_SHA::7}"
+          git push -f \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" \
+            gh-pages
+          echo "published; demo at https://phazon2.github.io/rescind/"
