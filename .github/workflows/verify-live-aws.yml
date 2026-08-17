@@ -1,0 +1,99 @@
+name: verify-live-aws
+
+# Proves the AWS Bedrock path for real, rather than in offline stand-in mode.
+#
+# THIS IS DORMANT UNTIL THREE REPOSITORY SECRETS EXIST:
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+# Settings -> Secrets and variables -> Actions -> New repository secret.
+# Bedrock model access for amazon.titan-embed-text-v2:0 and the Claude model in
+# rescind/config.py must also be enabled in that region's Bedrock console.
+#
+# Without the secrets the job exits cleanly with a message: a workflow that fails
+# until someone pastes a credential would put a red cross on the repository.
+#
+# When it does run it answers the one Bedrock question the offline suite cannot:
+# does Titan actually return 1024 dimensions, which is what the schema hardcodes.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "rescind/bedrock.py"
+      - ".github/workflows/verify-live-aws.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    env:
+      RESCIND_DATABASE_URL: postgresql://root@localhost:26257/rescind?sslmode=disable
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Are AWS credentials configured?
+        id: creds
+        run: |
+          if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No AWS secrets set. This job is dormant by design — see the"
+            echo "header of .github/workflows/verify-live-aws.yml. Nothing failed."
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.creds.outputs.present == 'true'
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: steps.creds.outputs.present == 'true'
+        run: pip install -r requirements.txt
+
+      - name: Install and start CockroachDB
+        if: steps.creds.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          CANDIDATES=$(curl -fsSL https://api.github.com/repos/cockroachdb/cockroach/releases?per_page=100 \
+            | grep -o '"tag_name": *"v[0-9.]*"' | grep -o 'v[0-9.]*' \
+            | grep -E '^v(25\.[2-9]|2[6-9]\.[0-9]+)\.[0-9]+$' | sort -V -r | head -20 || true)
+          CANDIDATES="$CANDIDATES v25.3.0 v25.2.3 v25.2.0"
+          for V in $CANDIDATES; do
+            curl -fsSL -o crdb.tgz "https://binaries.cockroachdb.com/cockroach-$V.linux-amd64.tgz" && break
+          done
+          tar -xzf crdb.tgz && sudo cp cockroach-*/cockroach /usr/local/bin/
+          nohup cockroach start-single-node --insecure --store=type=mem,size=1GiB \
+            --listen-addr=localhost:26257 --http-addr=localhost:8080 > cockroach.log 2>&1 &
+          for i in $(seq 1 60); do
+            cockroach sql --insecure -e "SELECT 1" >/dev/null 2>&1 && break; sleep 1
+          done
+          cockroach sql --insecure -e "CREATE DATABASE IF NOT EXISTS rescind"
+          python scripts/apply_schema.py
+
+      # RESCIND_OFFLINE is deliberately NOT set here: this is the live path.
+      - name: Probe Bedrock for real
+        if: steps.creds.outputs.present == 'true'
+        run: python scripts/probe_bedrock.py 2>&1 | tee ci/run-bedrock.log
+
+      - name: Commit the Bedrock evidence
+        if: steps.creds.outputs.present == 'true' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git config user.name "rescind-ci"
+          git config user.email "ci@rescind.invalid"
+          for f in ci/bedrock.json ci/run-bedrock.log; do
+            [ -f "$f" ] && git add -f "$f"
+          done
+          if git diff --cached --quiet; then
+            echo "no change"
+          else
+            git commit -m "ci: live Bedrock evidence for ${GITHUB_SHA::7} [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
