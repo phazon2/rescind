@@ -71,11 +71,12 @@ jobs:
       - name: Minimal SQL repro harness
         run: python scripts/smoke_sql.py
 
-      - name: Probe CockroachDB assumptions
-        run: python scripts/probe_cockroach.py
-
       - name: Apply schema
         run: python scripts/apply_schema.py
+
+      # After the schema exists: two probes read the real tables.
+      - name: Probe CockroachDB assumptions
+        run: python scripts/probe_cockroach.py
 
       - name: Seed the recall scenario
         run: python scripts/seed.py
@@ -94,9 +95,11 @@ jobs:
       - name: Show cluster errors on failure
         if: failure()
         run: |
-          # Only the error lines: a full cluster-log dump buries the traceback
-          # that actually explains the failure.
-          grep -iE '\b(error|panic|fatal)\b' cockroach.log | tail -20 || echo "no cluster-level errors"
+          # Match on CockroachDB's severity prefix (E = error, F = fatal) rather
+          # than the word "error": a single-node cluster logs benign
+          # "error processing replica" info lines constantly, and grepping for the
+          # word buries the Python traceback that actually explains the failure.
+          grep -E '^[EF][0-9]{6}' cockroach.log | tail -15 || echo "no cluster-level errors"
 
       - name: Commit the receipt
         if: always() && github.event_name == 'push'
