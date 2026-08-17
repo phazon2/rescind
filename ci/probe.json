@@ -1,0 +1,41 @@
+{
+  "cluster": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
+  "probes": [
+    {
+      "probe": "vector_index_setting",
+      "claim": "Vector indexes require SET CLUSTER SETTING feature.vector_index.enabled = true",
+      "supported": true,
+      "detail": "setting is True"
+    },
+    {
+      "probe": "computed_column_as_vector_index_prefix",
+      "claim": "A STORED computed column can be a prefix column of a vector index",
+      "supported": true,
+      "detail": "accepted"
+    },
+    {
+      "probe": "recursive_cte_with_update",
+      "claim": "WITH RECURSIVE can drive an UPDATE in a single statement",
+      "supported": true,
+      "detail": "single-statement form parses"
+    },
+    {
+      "probe": "hlc_and_time_travel",
+      "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
+      "supported": false,
+      "detail": "UndefinedTable: relation \"lots\" does not exist"
+    },
+    {
+      "probe": "vector_index_used_by_retrieval",
+      "claim": "The retrieval query plan actually uses facts_live_by_lot",
+      "supported": false,
+      "detail": "UndefinedTable: relation \"facts\" does not exist"
+    },
+    {
+      "probe": "titan_embedding_dimensions",
+      "claim": "Titan returns exactly 1024 dimensions",
+      "supported": false,
+      "detail": "AssertionError: skipped: RESCIND_OFFLINE is set, no AWS call attempted"
+    }
+  ]
+}
