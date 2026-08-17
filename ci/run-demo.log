@@ -1,0 +1,18 @@
+/home/runner/work/rescind/rescind/rescind/agent.py:67: OfflineMode: RESCIND OFFLINE MODE: embedding is a deterministic local stand-in, NOT AWS Bedrock. Results are reproducible but carry no semantic authority. RESCIND_OFFLINE is set.
+  query_vec = embedder(question)
+RESCIND OFFLINE MODE: embedding is a deterministic local stand-in, NOT AWS Bedrock. Results are reproducible but carry no semantic authority. RESCIND_OFFLINE is set.
+RESCIND OFFLINE MODE: embedding is a deterministic local stand-in, NOT AWS Bedrock. Results are reproducible but carry no semantic authority. RESCIND_OFFLINE is set.
+1. agent answered: refused on 0 supporting memories
+2. retracted 3 facts (2 by cascade), flagged 0 decision(s)
+3. same question now: refused
+4. replay at hlc 1786974961538911876.0000000000: knew 0, knows 0, withdrawn 0
+
+wrote /home/runner/work/rescind/rescind/web/data.json
+Traceback (most recent call last):
+  File "/home/runner/work/rescind/rescind/scripts/record_demo.py", line 238, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/runner/work/rescind/rescind/scripts/record_demo.py", line 228, in main
+    assert payload["before"]["decision"]["verdict"] == "release", "expected an initial release"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: expected an initial release

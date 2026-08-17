@@ -1,4 +1,24 @@
-ImportError while loading conftest '/home/runner/work/rescind/rescind/tests/conftest.py'.
-tests/conftest.py:19: in <module>
-    from rescind.config import EMBED_DIM
-E   ModuleNotFoundError: No module named 'rescind'
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /opt/hostedtoolcache/Python/3.11.15/x64/bin/python
+cachedir: .pytest_cache
+rootdir: /home/runner/work/rescind/rescind
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 13 items
+
+tests/test_retraction.py::test_assert_fact_rejects_empty_provenance PASSED [  7%]
+tests/test_retraction.py::test_database_rejects_empty_provenance_too PASSED [ 15%]
+tests/test_retraction.py::test_derive_fact_rejects_missing_lineage PASSED [ 23%]
+tests/test_retraction.py::test_retracted_fact_is_unreachable_by_retrieval PASSED [ 30%]
+tests/test_retraction.py::test_retraction_cascades_through_lineage PASSED [ 38%]
+tests/test_retraction.py::test_retraction_flags_decisions_without_reversing_them PASSED [ 46%]
+tests/test_retraction.py::test_retraction_is_all_or_nothing PASSED       [ 53%]
+tests/test_retraction.py::test_retraction_writes_an_audit_row PASSED     [ 61%]
+tests/test_retraction.py::test_agent_refuses_below_threshold_without_calling_the_model PASSED [ 69%]
+tests/test_retraction.py::test_retraction_makes_a_previously_answerable_question_unanswerable PASSED [ 76%]
+tests/test_retraction.py::test_refusal_is_deterministic PASSED           [ 84%]
+tests/test_retraction.py::test_support_threshold_boundary_is_exact PASSED [ 92%]
+tests/test_retraction.py::test_replay_reads_the_snapshot_the_agent_actually_read PASSED [100%]
+
+------ generated xml file: /home/runner/work/rescind/rescind/ci/junit.xml ------
+============================== 13 passed in 0.51s ==============================

@@ -1,15 +1,9 @@
 seeded lots and shipments
-  observation  coa             680e5483-64c0-45bf-9006-a5ef2315d1dd
-  observation  cold_chain      01e80afd-9d40-48a1-9cf6-b7ec2c8dfbd5
-  observation  audit           a87cc7c8-5ebe-4b30-960d-1ef614f40161
-Traceback (most recent call last):
-  File "/home/runner/work/rescind/rescind/scripts/seed.py", line 124, in <module>
-    raise SystemExit(main())
-                     ^^^^^^
-  File "/home/runner/work/rescind/rescind/scripts/seed.py", line 105, in main
-    ids[der["key"]] = derive_fact(
-                      ^^^^^^^^^^^^
-  File "/home/runner/work/rescind/rescind/rescind/memory.py", line 154, in derive_fact
-    conn.executemany(
-    ^^^^^^^^^^^^^^^^
-AttributeError: 'Connection' object has no attribute 'executemany'
+  observation  coa             e5de4692-42eb-42ad-9dda-a1943ff50805
+  observation  cold_chain      ea88e421-233f-412d-b791-942ecdbd54ef
+  observation  audit           8a430946-35e4-4b1d-9640-f2f934dce538
+  derived      good_standing   2cfe7de8-efec-4f1d-b927-e650b487e13d
+  derived      meets_criteria  023f1ded-d0c6-4e6b-a897-95b41b36b8f0
+  derived      cleared         947a6e51-ed66-4a55-a0e5-14f70a8ae5c3
+
+6 facts, 5 lineage edges

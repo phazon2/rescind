@@ -1,0 +1,152 @@
+{
+  "what_this_is": "Machine-readable receipt for the most recent verification run. Records what this run observed, not what the tests claim.",
+  "commit": "ed228749788340e8cf32214b4f6191798b8f2590",
+  "ref": "claude/rescind-hackathon-handoff-1qj0lb",
+  "run_url": "https://github.com/phazon2/rescind/actions/runs/32037200565",
+  "generated_at_utc": "unknown",
+  "cockroachdb": {
+    "version": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
+    "topology": "single-node, in-memory store, started on the CI runner"
+  },
+  "bedrock": {
+    "mode": "offline-deterministic",
+    "note": "CI has no AWS credentials, so embeddings and reasoning use the deterministic stand-in. The database behaviour under test is unaffected: tests supply their own controlled vectors."
+  },
+  "tests": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "test": "test_assert_fact_rejects_empty_provenance",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.066,
+        "message": null
+      },
+      {
+        "test": "test_database_rejects_empty_provenance_too",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.008,
+        "message": null
+      },
+      {
+        "test": "test_derive_fact_rejects_missing_lineage",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.006,
+        "message": null
+      },
+      {
+        "test": "test_retracted_fact_is_unreachable_by_retrieval",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.024,
+        "message": null
+      },
+      {
+        "test": "test_retraction_cascades_through_lineage",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.046,
+        "message": null
+      },
+      {
+        "test": "test_retraction_flags_decisions_without_reversing_them",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.045,
+        "message": null
+      },
+      {
+        "test": "test_retraction_is_all_or_nothing",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.042,
+        "message": null
+      },
+      {
+        "test": "test_retraction_writes_an_audit_row",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.041,
+        "message": null
+      },
+      {
+        "test": "test_agent_refuses_below_threshold_without_calling_the_model",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.026,
+        "message": null
+      },
+      {
+        "test": "test_retraction_makes_a_previously_answerable_question_unanswerable",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.044,
+        "message": null
+      },
+      {
+        "test": "test_refusal_is_deterministic",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.041,
+        "message": null
+      },
+      {
+        "test": "test_support_threshold_boundary_is_exact",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.023,
+        "message": null
+      },
+      {
+        "test": "test_replay_reads_the_snapshot_the_agent_actually_read",
+        "certifies": null,
+        "status": "passed",
+        "seconds": 0.043,
+        "message": null
+      }
+    ]
+  },
+  "probes": [
+    {
+      "probe": "vector_index_setting",
+      "claim": "Vector indexes require SET CLUSTER SETTING feature.vector_index.enabled = true",
+      "supported": true,
+      "detail": "setting is True"
+    },
+    {
+      "probe": "computed_column_as_vector_index_prefix",
+      "claim": "A STORED computed column can be a prefix column of a vector index",
+      "supported": true,
+      "detail": "accepted"
+    },
+    {
+      "probe": "recursive_cte_with_update",
+      "claim": "WITH RECURSIVE can drive an UPDATE in a single statement",
+      "supported": true,
+      "detail": "single-statement form parses"
+    },
+    {
+      "probe": "hlc_and_time_travel",
+      "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
+      "supported": true,
+      "detail": "snapshot read at hlc 1786974959775454707.0000000000"
+    },
+    {
+      "probe": "vector_index_used_by_retrieval",
+      "claim": "The retrieval query plan actually uses facts_live_by_lot",
+      "supported": true,
+      "detail": "plan uses facts_live_by_lot"
+    },
+    {
+      "probe": "titan_embedding_dimensions",
+      "claim": "Titan returns exactly 1024 dimensions",
+      "supported": false,
+      "detail": "AssertionError: skipped: RESCIND_OFFLINE is set, no AWS call attempted"
+    }
+  ]
+}
