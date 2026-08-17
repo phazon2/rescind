@@ -24,6 +24,13 @@ CREATE USER IF NOT EXISTS rescind_app;
 GRANT CONNECT ON DATABASE rescind TO rescind_app;
 GRANT USAGE ON SCHEMA public TO rescind_app;
 
+-- CockroachDB grants CREATE on the public schema to the `public` role by
+-- default, which let rescind_app create its own tables -- verified by
+-- scripts/check_least_privilege.py, which caught this. Revoke it: an
+-- application that cannot DROP the schema should not be able to grow it either.
+REVOKE CREATE ON SCHEMA public FROM public;
+REVOKE CREATE ON SCHEMA public FROM rescind_app;
+
 -- Physical world: read, and update status when a lot is recalled.
 GRANT SELECT, UPDATE ON TABLE lots TO rescind_app;
 GRANT SELECT, UPDATE ON TABLE shipments TO rescind_app;

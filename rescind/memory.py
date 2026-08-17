@@ -295,6 +295,11 @@ def _retract_once(
 ) -> RetractionReceipt:
     """One attempt at the retraction transaction. Safe to replay from the start."""
     with conn.transaction():
+        # A recall is the highest-value write in the system: if it contends with
+        # ordinary agent writes, it should win rather than be aborted and retried.
+        # Measured at scale -- without this, a cascade over thousands of facts
+        # exhausted its retry budget (see ci/scale.json).
+        conn.execute("SET TRANSACTION PRIORITY HIGH")
         # 1. transitive closure over lineage
         doomed = [
             str(r["id"])

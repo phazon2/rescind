@@ -137,61 +137,76 @@ def main() -> int:
         print(f"\n=== query plan at scale ===\n  uses facts_live_by_lot: {used}")
 
         # ------------------------------------------------------- lineage cascade
-        t = phase(f"building a lineage chain {CHAIN_DEPTH} deep")
+        # Rather than one cascade of an arbitrary size, sweep increasing closure
+        # sizes and record where a single serializable transaction stops being
+        # able to carry the whole thing. A measured ceiling is worth more than an
+        # unqualified claim -- and this sweep is what found that the cascade
+        # needs HIGH transaction priority to survive at depth.
         lot = "LOT-SCALE-00000"
-        root = conn.execute(
-            "INSERT INTO facts (lot_id, kind, claim, source, embedding, asserted_hlc) "
-            f"VALUES (%s,'observation','Root certificate of analysis.','CoA root',%s::VECTOR({EMBED_DIM}),"
-            "cluster_logical_timestamp()) RETURNING id",
-            (lot, to_vector(unit_vector())),
-        ).fetchone()["id"]
 
-        # Each level fans out, so the transitive closure grows geometrically.
-        level = [root]
-        edges = 0
-        for depth in range(CHAIN_DEPTH):
-            nxt = []
-            for parent in level:
-                for _ in range(2):
-                    child = conn.execute(
-                        "INSERT INTO facts (lot_id, kind, claim, source, embedding, asserted_hlc) "
-                        f"VALUES (%s,'derived',%s,'rescind-agent',%s::VECTOR({EMBED_DIM}),"
-                        "cluster_logical_timestamp()) RETURNING id",
-                        (lot, f"Derived conclusion at depth {depth}.", to_vector(unit_vector())),
-                    ).fetchone()["id"]
-                    conn.execute(
-                        "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s,%s)",
-                        (parent, child),
-                    )
-                    nxt.append(child)
-                    edges += 1
-            level = nxt
-            if len(level) > 512:  # cap the fan-out so the build stays bounded
-                level = level[:512]
-        descendants = conn.execute(
-            """
-            WITH RECURSIVE d(id) AS (
-                SELECT %s::UUID
-              UNION
-                SELECT e.child_id FROM fact_edges e JOIN d ON e.parent_id = d.id
-            ) SELECT count(*) AS n FROM d
-            """,
-            (str(root),),
-        ).fetchone()["n"]
-        print(f"  {edges} lineage edges, {descendants} facts in the transitive closure")
+        def build_tree(depth: int) -> tuple[str, int]:
+            """Binary lineage tree; closure size is 2**(depth+1) - 1."""
+            root = conn.execute(
+                "INSERT INTO facts (lot_id, kind, claim, source, embedding, asserted_hlc) "
+                f"VALUES (%s,'observation','Root certificate of analysis.','CoA root',"
+                f"%s::VECTOR({EMBED_DIM}),cluster_logical_timestamp()) RETURNING id",
+                (lot, to_vector(unit_vector())),
+            ).fetchone()["id"]
+            level, n = [root], 1
+            for d in range(depth):
+                nxt = []
+                for parent in level:
+                    for _ in range(2):
+                        child = conn.execute(
+                            "INSERT INTO facts (lot_id, kind, claim, source, embedding, asserted_hlc) "
+                            f"VALUES (%s,'derived',%s,'rescind-agent',%s::VECTOR({EMBED_DIM}),"
+                            "cluster_logical_timestamp()) RETURNING id",
+                            (lot, f"Derived conclusion at depth {d}.", to_vector(unit_vector())),
+                        ).fetchone()["id"]
+                        conn.execute(
+                            "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s,%s)",
+                            (parent, child),
+                        )
+                        nxt.append(child)
+                        n += 1
+                level = nxt
+            return str(root), n
 
-        t = phase("retracting the root — one serializable transaction")
-        s = time.perf_counter()
-        receipt = retract(conn, lot, [str(root)], "Scale benchmark: root CoA withdrawn.")
-        cascade_s = time.perf_counter() - s
-        results["cascade"] = {
-            "lineage_edges": edges,
-            "facts_retracted": receipt.facts_retracted,
-            "pulled_down_by_cascade": receipt.cascade_depth_beyond_roots,
-            "seconds": round(cascade_s, 3),
-        }
-        print(f"  retracted {receipt.facts_retracted} facts "
-              f"({receipt.cascade_depth_beyond_roots} by cascade) in {cascade_s:.3f}s")
+        sweep = []
+        for depth in (6, 8, 10, 11):
+            t = phase(f"cascade sweep: lineage tree of depth {depth}")
+            root, built = build_tree(depth)
+            print(f"  built {built} facts")
+            s = time.perf_counter()
+            try:
+                receipt = retract(conn, lot, [root], f"Scale sweep at depth {depth}.")
+                elapsed = time.perf_counter() - s
+                sweep.append({
+                    "depth": depth,
+                    "closure_size": built,
+                    "facts_retracted": receipt.facts_retracted,
+                    "seconds": round(elapsed, 3),
+                    "single_transaction": True,
+                })
+                print(f"  retracted {receipt.facts_retracted} facts in one transaction, {elapsed:.3f}s")
+            except Exception as exc:  # noqa: BLE001
+                elapsed = time.perf_counter() - s
+                sweep.append({
+                    "depth": depth,
+                    "closure_size": built,
+                    "seconds": round(elapsed, 3),
+                    "single_transaction": False,
+                    "error": f"{type(exc).__name__}: {exc}"[:200],
+                })
+                print(f"  FAILED after {elapsed:.3f}s: {type(exc).__name__}")
+
+        committed = [s for s in sweep if s["single_transaction"]]
+        results["cascade_sweep"] = sweep
+        results["largest_single_transaction_cascade"] = (
+            max(s["facts_retracted"] for s in committed) if committed else 0
+        )
+        print(f"\n  largest cascade committed in ONE transaction: "
+              f"{results['largest_single_transaction_cascade']} facts")
 
         # ------------------------------------- retracted rows are gone from recall
         live = conn.execute("SELECT count(*) AS n FROM facts WHERE retracted = false").fetchone()["n"]

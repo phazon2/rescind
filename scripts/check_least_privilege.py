@@ -106,8 +106,22 @@ def main() -> int:
             "flagged_decision_ids, facts_retracted, decisions_flagged, retracted_hlc) "
             "VALUES (%s,'recall','coordinator',ARRAY[%s]::UUID[],ARRAY[%s]::UUID[],ARRAY[]::UUID[],1,0,"
             "cluster_logical_timestamp())", (LOT, fact_id, fact_id)))
-        allowed("AS OF SYSTEM TIME read", lambda: app.execute(
-            "SELECT count(*) FROM facts AS OF SYSTEM TIME '-5s'").fetchall())
+        def time_travel_read():
+            # Pin to an HLC captured now. A relative interval like '-5s' can land
+            # before the schema existed on a freshly created cluster, which reads
+            # as "relation does not exist" rather than as a privilege result.
+            hlc = str(list(app.execute(
+                "SELECT cluster_logical_timestamp() AS t").fetchone().values())[0])
+            app.execute("BEGIN")
+            try:
+                app.execute(f"SET TRANSACTION AS OF SYSTEM TIME {hlc}")
+                app.execute("SELECT count(*) FROM facts").fetchall()
+                app.execute("COMMIT")
+            except Exception:
+                app.execute("ROLLBACK")
+                raise
+
+        allowed("AS OF SYSTEM TIME read", time_travel_read)
 
         print("\nwhat the application MUST NOT be able to do:")
         refused("DELETE a fact", lambda: app.execute("DELETE FROM facts WHERE lot_id = %s", (LOT,)))
