@@ -107,6 +107,27 @@ jobs:
           python scripts/seed.py > /dev/null
           python scripts/record_demo.py 2>&1 | tee ci/run-demo.log
 
+      # Access control: prove the app role cannot destroy its own audit trail.
+      - name: Verify least privilege
+        id: privileges
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mkdir -p ci
+          python scripts/check_least_privilege.py 2>&1 | tee ci/run-privileges.log
+
+      # Scale: the criterion asks for real scale, so measure it rather than
+      # asserting it. This wipes the tables, so it runs after the demo recording.
+      - name: Benchmark at scale
+        id: scale
+        continue-on-error: true
+        env:
+          RESCIND_SCALE_FACTS: "20000"
+        run: |
+          set -o pipefail
+          mkdir -p ci
+          python scripts/benchmark_scale.py 2>&1 | tee ci/run-scale.log
+
       - name: Build the CI receipt
         if: always()
         run: |
@@ -134,11 +155,13 @@ jobs:
           # Added individually: git add fails as a whole if any pathspec is missing.
           # Trim the .log files only. Never tail a .json file -- that would
           # truncate it into invalid JSON.
-          for f in ci/run-seed.log ci/run-tests.log ci/run-demo.log; do
+          for f in ci/run-seed.log ci/run-tests.log ci/run-demo.log \
+                   ci/run-privileges.log ci/run-scale.log; do
             [ -f "$f" ] && { tail -200 "$f" > "$f.trimmed" && mv "$f.trimmed" "$f"; }
           done
-          for f in ci/latest.json ci/probe.json ci/run-seed.log ci/run-tests.log \
-                   ci/run-demo.log web/data.json web/data.js; do
+          for f in ci/latest.json ci/probe.json ci/scale.json ci/privileges.json \
+                   ci/run-seed.log ci/run-tests.log ci/run-demo.log \
+                   ci/run-privileges.log ci/run-scale.log web/data.json web/data.js; do
             [ -f "$f" ] && git add -f "$f"
           done
           if git diff --cached --quiet; then
@@ -154,9 +177,13 @@ jobs:
           echo "seed:  ${{ steps.seed.outcome }}"
           echo "tests: ${{ steps.tests.outcome }}"
           echo "demo:  ${{ steps.demo.outcome }}"
+          echo "privs: ${{ steps.privileges.outcome }}"
+          echo "scale: ${{ steps.scale.outcome }}"
           if [ "${{ steps.seed.outcome }}" != "success" ] \
              || [ "${{ steps.tests.outcome }}" != "success" ] \
-             || [ "${{ steps.demo.outcome }}" != "success" ]; then
+             || [ "${{ steps.demo.outcome }}" != "success" ] \
+             || [ "${{ steps.privileges.outcome }}" != "success" ] \
+             || [ "${{ steps.scale.outcome }}" != "success" ]; then
             echo "verification failed"
             exit 1
           fi
