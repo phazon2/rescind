@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rescind — retractable agent memory</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --ink: #14140f; --muted: #6b6b60;
+    --line: #e2e2dc; --accent: #8a2b2b; --accent-soft: #f7ecec;
+    --ok: #2f6b46; --ok-soft: #ecf5ef; --warn: #8a5a00; --warn-soft: #fbf3e2;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14140f; --panel: #1c1c17; --ink: #f2f2ec; --muted: #9a9a8e;
+      --line: #2e2e26; --accent: #e08585; --accent-soft: #2a1b1b;
+      --ok: #7fc79c; --ok-soft: #17251c; --warn: #d9ad5c; --warn-soft: #251f12;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 72px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 26px; }
+  h1 { margin: 0 0 10px; font-size: 27px; letter-spacing: -0.02em; }
+  .claim { margin: 0; font-size: 17px; color: var(--ink); max-width: 62ch; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 16px;
+  }
+  .label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--muted); margin-bottom: 10px; font-weight: 600;
+  }
+  .lotgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .lotgrid div span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .lotgrid div b { font-weight: 600; font-size: 14px; }
+  .verdict { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .pill {
+    font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 4px 10px; border-radius: 999px; text-transform: uppercase;
+  }
+  .pill.release { background: var(--ok-soft); color: var(--ok); }
+  .pill.refused { background: var(--accent-soft); color: var(--accent); }
+  .pill.flagged { background: var(--warn-soft); color: var(--warn); }
+  .question { font-size: 17px; font-weight: 600; margin: 0 0 12px; }
+  .rationale { margin: 10px 0 0; color: var(--ink); }
+  ul.facts { list-style: none; margin: 0; padding: 0; }
+  ul.facts li {
+    padding: 11px 0; border-top: 1px solid var(--line); display: flex; gap: 12px;
+  }
+  ul.facts li:first-child { border-top: 0; }
+  .kind {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line); border-radius: 4px;
+    padding: 2px 6px; height: fit-content; white-space: nowrap; margin-top: 2px;
+  }
+  .fbody { flex: 1; min-width: 0; }
+  .claimtext { font-size: 15px; }
+  .src { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  li.gone .claimtext { text-decoration: line-through; opacity: 0.5; }
+  li.gone .src { opacity: 0.5; }
+  .gonetag {
+    display: inline-block; font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--accent); background: var(--accent-soft);
+    padding: 2px 6px; border-radius: 4px; margin-top: 6px;
+  }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px;
+    padding: 13px 20px; border: 1px solid transparent; width: 100%;
+  }
+  button.danger { background: var(--accent); color: #fff; font-size: 16px; }
+  button.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+  .cascade { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; }
+  .cascade div { text-align: center; }
+  .cascade b { display: block; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+  .cascade span { font-size: 12px; color: var(--muted); }
+  .atomic {
+    margin: 14px 0 0; padding-top: 13px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+  }
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 620px) { .twocol { grid-template-columns: 1fr; } }
+  .twocol h3 { font-size: 13px; margin: 0 0 9px; }
+  .twocol ul { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+  .twocol li { padding: 7px 0; border-top: 1px solid var(--line); }
+  .twocol li:first-child { border-top: 0; }
+  .hlc { font-family: var(--mono); font-size: 11px; color: var(--muted); word-break: break-all; }
+  footer {
+    margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted);
+  }
+  footer a { color: var(--muted); }
+  .hidden { display: none; }
+  .err { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Rescind</h1>
+    <p class="claim">
+      When a lot is recalled, Rescind pulls back every conclusion the agent built
+      on it — in one transaction, with proof of what the agent knew before and
+      after.
+    </p>
+  </header>
+
+  <div id="app"><p id="loading">Loading the recorded scenario…</p></div>
+
+  <footer id="prov"></footer>
+</div>
+
+<!-- Recorded by scripts/record_demo.py against a real cluster. Loaded as a
+     script rather than fetched so the page works from disk and from any host. -->
+<script src="data.js"></script>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let D = null, recalled = false;
+
+function factList(facts, retractedIds) {
+  return `<ul class="facts">` + facts.map(f => {
+    const gone = retractedIds.has(f.id);
+    return `<li class="${gone ? 'gone' : ''}">
+      <span class="kind">${f.kind === 'derived' ? 'concluded' : 'observed'}</span>
+      <div class="fbody">
+        <div class="claimtext">${esc(f.claim)}</div>
+        <div class="src">${esc(f.source)}</div>
+        ${gone ? `<span class="gonetag">retracted</span>` : ``}
+      </div></li>`;
+  }).join('') + `</ul>`;
+}
+
+function render() {
+  const stage = recalled ? D.after : D.before;
+  const retractedIds = new Set(recalled ? D.retraction.retracted_fact_ids : []);
+  const d = stage.decision;
+  const flagged = recalled && D.after.open_reviews.length > 0;
+
+  let html = `
+  <div class="panel">
+    <div class="label">Staged shipment</div>
+    <div class="lotgrid">
+      <div><span>Lot</span><b>${esc(D.lot.lot_id)}</b></div>
+      <div><span>Product</span><b>${esc(D.lot.product_name)}</b></div>
+      <div><span>Supplier</span><b>${esc(D.lot.supplier)}</b></div>
+      <div><span>Destination</span><b>${esc(D.shipment.destination)}</b></div>
+      <div><span>Units</span><b>${D.shipment.units.toLocaleString()}</b></div>
+      <div><span>Lot status</span><b>${recalled ? 'RECALLED' : 'Active'}</b></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="label">The agent was asked</div>
+    <p class="question">${esc(d.question)}</p>
+    <div class="verdict">
+      <span class="pill ${d.verdict === 'release' ? 'release' : 'refused'}">${esc(d.verdict)}</span>
+      <span class="src">${d.supporting.length} live supporting ${d.supporting.length === 1 ? 'memory' : 'memories'}
+        (threshold: ${D.thresholds.min_supporting_facts} within distance ${D.thresholds.max_supporting_distance})</span>
+      ${flagged ? `<span class="pill flagged">needs human review</span>` : ``}
+    </div>
+    <p class="rationale">${esc(d.rationale)}</p>
+    ${flagged ? `<p class="atomic">The earlier “release” was <b>flagged, not reversed</b>.
+      Reversing a shipment release is a human's call.</p>` : ``}
+  </div>
+
+  <div class="panel">
+    <div class="label">What the agent remembers about this lot</div>
+    ${factList(stage.facts, retractedIds)}
+  </div>`;
+
+  if (!recalled) {
+    html += `<div class="panel"><button class="danger" id="go">
+      Northvale issues a recall — retract the Certificate of Analysis</button></div>`;
+  } else {
+    const r = D.retraction;
+    html += `
+    <div class="panel">
+      <div class="label">Blast radius of the recall</div>
+      <div class="cascade">
+        <div><b>${r.facts_retracted}</b><span>memories retracted</span></div>
+        <div><b>${r.cascade_beyond_roots}</b><span>conclusions pulled down by cascade</span></div>
+        <div><b>${r.decisions_flagged}</b><span>decision flagged for review</span></div>
+      </div>
+      <p class="atomic">All of it committed in <b>one serializable transaction</b>.
+        A partial retraction would leave conclusions standing on facts the system
+        has already disowned.</p>
+    </div>
+
+    <div class="panel">
+      <div class="label">Proof of what the agent knew — AS OF SYSTEM TIME</div>
+      <p class="hlc">replayed at hybrid logical clock ${esc(D.replay.decided_hlc)}</p>
+      <div class="twocol">
+        <div><h3>Knew when it said “release”</h3><ul>
+          ${D.replay.knew_then.map(f => `<li>${esc(f.claim)}</li>`).join('')}
+        </ul></div>
+        <div><h3>Knows now</h3><ul>
+          ${D.replay.knows_now.length
+            ? D.replay.knows_now.map(f => `<li>${esc(f.claim)}</li>`).join('')
+            : `<li><i>nothing that clears this lot</i></li>`}
+        </ul></div>
+      </div>
+      <p class="atomic">This is not a reconstruction. The decision stored the
+        cluster's hybrid logical clock, so the replay reads the identical MVCC
+        snapshot the agent read.</p>
+    </div>
+
+    <div class="panel"><button class="ghost" id="reset">Replay from the start</button></div>`;
+  }
+
+  $('#app').innerHTML = html;
+  if ($('#go')) $('#go').onclick = () => { recalled = true; render(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+  if ($('#reset')) $('#reset').onclick = () => { recalled = false; render(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+}
+
+function boot(data) {
+    D = data;
+    render();
+    const p = D.recorded_from;
+    // Link by commit SHA, not by branch name: a permalink resolves whichever
+    // branch this was recorded from, and keeps working after a merge or rename.
+    const sha = String(p.commit || 'HEAD');
+    const base = 'https://github.com/phazon2/rescind';
+    const at = (path) => `${base}/blob/${encodeURIComponent(sha)}/${path}`;
+    $('#prov').innerHTML =
+      `Every value on this page was produced by <code>scripts/record_demo.py</code>
+       running against a real cluster: <b>${esc(p.cockroachdb_version.split('(')[0].trim())}</b>,
+       commit <code>${esc(sha.slice(0, 7))}</code>.
+       Embeddings: ${esc(p.embeddings)}.
+       <a href="${base}">Source</a> ·
+       <a href="${at('docs/LIMITS.md')}">Limits</a> ·
+       <a href="${at('ci/latest.json')}">CI receipt</a>`;
+}
+
+function failed(detail) {
+  $('#app').innerHTML = `<div class="panel"><p class="err">Could not load the
+    recorded scenario (${esc(detail)}). It is generated by
+    <code>scripts/record_demo.py</code> during CI.</p></div>`;
+}
+
+if (window.RESCIND_DATA) {
+  boot(window.RESCIND_DATA);
+} else {
+  // Fallback for a checkout where data.js has not been generated yet.
+  fetch('data.json')
+    .then(r => { if (!r.ok) throw new Error('data.json ' + r.status); return r.json(); })
+    .then(boot)
+    .catch(e => failed(e.message));
+}
+</script>
+</body>
+</html>
