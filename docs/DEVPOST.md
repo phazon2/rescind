@@ -152,12 +152,17 @@ Bedrock (Titan, Claude) · Python 3.11 · psycopg 3 · MCP · GitHub Actions
 > empty repository and every `blob/main/...` link 404s. This is the single highest-value
 > action on the list.
 >
-> **Check the demo link before pasting it.** `https://phazon2.github.io/rescind/`
-> only goes live once GitHub Pages is switched on: **Settings → Pages → Build and
-> deployment → Source: "GitHub Actions"**, then re-run the `pages` workflow. Open
-> the URL and confirm it renders before submitting — a 404 on the demo link is
-> worse than no demo link. Until it is live, `web/index.html` in the repository
-> renders correctly when opened directly from disk, and that is a usable fallback.
+> **Open the demo link once before pasting it.** The demo is published from the
+> `gh-pages` branch by the `publish-demo` workflow, and GitHub's "pages build and
+> deployment" job has run against it. Confirm
+> `https://phazon2.github.io/rescind/` renders — a 404 on the demo link is worse
+> than no demo link.
+>
+> If it does 404, Pages needs enabling once: **Settings → Pages → Build and
+> deployment → Deploy from a branch → Branch: `gh-pages` / `(root)`**. Nothing
+> else needs changing; the branch already holds the built page. `web/index.html`
+> also renders correctly opened straight from disk, which is a usable fallback for
+> recording the video.
 
 - **Repository:** https://github.com/phazon2/rescind
 - **Demo:** https://phazon2.github.io/rescind/

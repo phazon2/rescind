@@ -4,7 +4,7 @@ RESCIND OFFLINE MODE: reasoning is a deterministic local stand-in, NOT AWS Bedro
 1. agent answered: release on 4 supporting memories
 2. retracted 3 facts (2 by cascade), flagged 1 decision(s)
 3. same question now: refused
-4. replay at hlc 1787000676882929875.0000000000: knew 4, knows 1, withdrawn 3
+4. replay at hlc 1787000546314297516.0000000000: knew 4, knows 1, withdrawn 3
 
 wrote /home/runner/work/rescind/rescind/web/data.json
 wrote /home/runner/work/rescind/rescind/web/data.js
