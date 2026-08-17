@@ -151,12 +151,14 @@ def derive_fact(
         fact_id = assert_fact(
             conn, lot_id, claim, source, embedding, kind="derived"
         )
-        conn.executemany(
-            # Explicit ::UUID casts: psycopg sends Python strings as text, and a
-            # text parameter is not implicitly assignable to a UUID column.
-            "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s::UUID, %s::UUID)",
-            [(pid, fact_id) for pid in dict.fromkeys(parent_ids)],
-        )
+        # executemany lives on the cursor, not the connection.
+        # Explicit ::UUID casts: psycopg sends Python strings as text, and a text
+        # parameter is not implicitly assignable to a UUID column.
+        with conn.cursor() as cur:
+            cur.executemany(
+                "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s::UUID, %s::UUID)",
+                [(pid, fact_id) for pid in dict.fromkeys(parent_ids)],
+            )
     return fact_id
 
 

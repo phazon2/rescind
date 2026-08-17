@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rescind"
+version = "0.1.0"
+description = "Retractable agent memory on CockroachDB"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]>=3.1",
+    "boto3>=1.34",
+]
+
+[tool.setuptools]
+packages = ["rescind"]
+
+[tool.pytest.ini_options]
+# Put the repository root on sys.path so `import rescind` works without an
+# editable install, and keep tests/ importable so conftest helpers can be
+# imported by name.
+pythonpath = [".", "tests"]
+testpaths = ["tests"]
+filterwarnings = [
+    # rescind.bedrock warns on every offline call by design. In CI that is every
+    # call, so it is recorded rather than treated as noise.
+    "default::rescind.bedrock.OfflineMode",
+]

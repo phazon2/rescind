@@ -142,13 +142,15 @@ def _record(
         ).fetchone()
 
         if supporting:
-            conn.executemany(
-                """
-                INSERT INTO decision_support (decision_id, fact_id, distance)
-                VALUES (%s::UUID, %s::UUID, %s)
-                """,
-                [(row["id"], r.id, r.distance) for r in supporting],
-            )
+            # executemany lives on the cursor, not the connection.
+            with conn.cursor() as cur:
+                cur.executemany(
+                    """
+                    INSERT INTO decision_support (decision_id, fact_id, distance)
+                    VALUES (%s::UUID, %s::UUID, %s)
+                    """,
+                    [(str(row["id"]), r.id, r.distance) for r in supporting],
+                )
 
     return str(row["id"]), str(row["decided_hlc"])
 

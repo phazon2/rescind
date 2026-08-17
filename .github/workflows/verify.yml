@@ -96,6 +96,17 @@ jobs:
           mkdir -p ci
           pytest -v --junitxml=ci/junit.xml 2>&1 | tee ci/run-tests.log
 
+      # The test suite truncates between tests, so re-seed before recording.
+      # web/data.json is what the demo page renders: real ids, real hybrid logical
+      # clocks, real blast radius, captured from this cluster.
+      - name: Record the demo scenario from the real cluster
+        id: demo
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python scripts/seed.py > /dev/null
+          python scripts/record_demo.py 2>&1 | tee ci/run-demo.log
+
       - name: Build the CI receipt
         if: always()
         run: |
@@ -119,11 +130,14 @@ jobs:
           git config user.name "rescind-ci"
           git config user.email "ci@rescind.invalid"
           # Added individually: git add fails as a whole if any pathspec is missing.
-          for f in ci/latest.json ci/probe.json ci/run-seed.log ci/run-tests.log; do
-            if [ -f "$f" ]; then
-              tail -200 "$f" > "$f.trimmed" && mv "$f.trimmed" "$f"
-              git add -f "$f"
-            fi
+          # Trim the .log files only. Never tail a .json file -- that would
+          # truncate it into invalid JSON.
+          for f in ci/run-seed.log ci/run-tests.log ci/run-demo.log; do
+            [ -f "$f" ] && { tail -200 "$f" > "$f.trimmed" && mv "$f.trimmed" "$f"; }
+          done
+          for f in ci/latest.json ci/probe.json ci/run-seed.log ci/run-tests.log \
+                   ci/run-demo.log web/data.json; do
+            [ -f "$f" ] && git add -f "$f"
           done
           if git diff --cached --quiet; then
             echo "receipt unchanged"
@@ -137,7 +151,10 @@ jobs:
         run: |
           echo "seed:  ${{ steps.seed.outcome }}"
           echo "tests: ${{ steps.tests.outcome }}"
-          if [ "${{ steps.seed.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
+          echo "demo:  ${{ steps.demo.outcome }}"
+          if [ "${{ steps.seed.outcome }}" != "success" ] \
+             || [ "${{ steps.tests.outcome }}" != "success" ] \
+             || [ "${{ steps.demo.outcome }}" != "success" ]; then
             echo "verification failed"
             exit 1
           fi
