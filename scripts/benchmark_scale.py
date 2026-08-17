@@ -216,5 +216,25 @@ def main() -> int:
     return 0
 
 
+def _guarded() -> int:
+    """Always leave ci/scale.json behind, even when a phase raises.
+
+    A benchmark that dies without saying why costs a full CI round trip to
+    diagnose, and each of these runs takes minutes.
+    """
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001
+        import traceback
+        OUT.parent.mkdir(exist_ok=True)
+        OUT.write_text(json.dumps({
+            "failed": True,
+            "error": f"{type(exc).__name__}: {exc}"[:600],
+            "traceback": traceback.format_exc()[-2000:],
+        }, indent=2) + "\n")
+        traceback.print_exc()
+        return 1
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_guarded())
