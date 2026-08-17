@@ -1,8 +1,8 @@
 {
   "what_this_is": "Machine-readable receipt for the most recent verification run. Records what this run observed, not what the tests claim.",
-  "commit": "aa6c83e8680afe129e21519ceb3e82fb3dcb8646",
+  "commit": "631fff0e19990067b88d9ab151ace1ab94edefc0",
   "ref": "claude/rescind-hackathon-handoff-1qj0lb",
-  "run_url": "https://github.com/phazon2/rescind/actions/runs/32037806883",
+  "run_url": "https://github.com/phazon2/rescind/actions/runs/32037941473",
   "generated_at_utc": "unknown",
   "cockroachdb": {
     "version": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
@@ -22,7 +22,7 @@
         "test": "test_assert_fact_rejects_empty_provenance",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.057,
+        "seconds": 0.056,
         "message": null
       },
       {
@@ -43,7 +43,7 @@
         "test": "test_retracted_fact_is_unreachable_by_retrieval",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.018,
+        "seconds": 0.023,
         "message": null
       },
       {
@@ -57,7 +57,7 @@
         "test": "test_retraction_flags_decisions_without_reversing_them",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.044,
+        "seconds": 0.043,
         "message": null
       },
       {
@@ -71,7 +71,7 @@
         "test": "test_retraction_writes_an_audit_row",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.045,
+        "seconds": 0.052,
         "message": null
       },
       {
@@ -85,14 +85,14 @@
         "test": "test_retraction_makes_a_previously_answerable_question_unanswerable",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.035,
+        "seconds": 0.036,
         "message": null
       },
       {
         "test": "test_refusal_is_deterministic",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.037,
+        "seconds": 0.036,
         "message": null
       },
       {
@@ -106,7 +106,7 @@
         "test": "test_replay_reads_the_snapshot_the_agent_actually_read",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.041,
+        "seconds": 0.04,
         "message": null
       }
     ]
@@ -134,7 +134,7 @@
       "probe": "hlc_and_time_travel",
       "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
       "supported": true,
-      "detail": "snapshot read at hlc 1786975564872172283.0000000000"
+      "detail": "snapshot read at hlc 1786975691829556535.0000000000"
     },
     {
       "probe": "vector_index_used_by_retrieval",
