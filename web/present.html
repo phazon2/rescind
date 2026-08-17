@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rescind — presentation</title>
+<style>
+  :root {
+    --bg:#0d0d0a; --panel:#17170f; --line:#2b2b20; --ink:#f4f4ec; --muted:#8f8f80;
+    --accent:#e07a7a; --accent-bg:#2a1616; --ok:#7fc79c; --ok-bg:#152219;
+    --warn:#e0b45c; --warn-bg:#241d10;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#000;overflow:hidden;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased}
+  /* Fixed 16:9 stage, scaled to fit — so a screen recording is always framed
+     identically regardless of window size. */
+  #stage{position:absolute;top:50%;left:50%;width:1600px;height:900px;
+    transform-origin:center;background:var(--bg);color:var(--ink);overflow:hidden}
+  #scene{position:absolute;inset:0;padding:70px 90px 190px;display:flex;
+    flex-direction:column;justify-content:center}
+  .fade{animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  h1{font-size:66px;letter-spacing:-.03em;font-weight:700}
+  h2{font-size:40px;letter-spacing:-.02em;font-weight:650;margin-bottom:26px}
+  .eyebrow{font-size:17px;text-transform:uppercase;letter-spacing:.16em;
+    color:var(--muted);font-weight:600;margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px 40px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 44px}
+  .grid div span{display:block;font-size:17px;color:var(--muted);margin-bottom:6px}
+  .grid div b{font-size:27px;font-weight:650}
+  ul{list-style:none}
+  li{display:flex;gap:20px;padding:15px 0;border-top:1px solid var(--line);font-size:24px}
+  li:first-child{border-top:0}
+  .tag{font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 9px;
+    height:fit-content;white-space:nowrap;margin-top:4px}
+  .src{font-size:16px;color:var(--muted);margin-top:5px}
+  li.gone .claim{text-decoration:line-through;opacity:.42}
+  li.gone .src{opacity:.42}
+  .struck{color:var(--accent);font-family:var(--mono);font-size:13px;
+    text-transform:uppercase;letter-spacing:.08em;margin-top:7px;display:inline-block}
+  .pill{display:inline-block;font-family:var(--mono);font-size:22px;font-weight:700;
+    letter-spacing:.07em;padding:10px 22px;border-radius:999px;text-transform:uppercase}
+  .pill.ok{background:var(--ok-bg);color:var(--ok)}
+  .pill.no{background:var(--accent-bg);color:var(--accent)}
+  .pill.flag{background:var(--warn-bg);color:var(--warn);font-size:17px}
+  .row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .big{display:grid;grid-template-columns:repeat(3,1fr);gap:50px;text-align:center;margin:14px 0 20px}
+  /* The cascade scene carries the big numbers AND all six memories, so its
+     list runs compact to stay clear of the caption bar. */
+  .compact li{font-size:20px;padding:9px 0}
+  .compact .src{font-size:14px;margin-top:3px}
+  .compact .struck{font-size:11px;margin-top:4px}
+  .big b{display:block;font-size:100px;font-weight:700;letter-spacing:-.04em;line-height:1}
+  .big span{font-size:21px;color:var(--muted)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:14px}
+  .cols h3{font-size:21px;margin-bottom:16px;color:var(--muted);font-weight:600}
+  .cols li{font-size:21px;padding:13px 0}
+  code,pre{font-family:var(--mono)}
+  pre{font-size:26px;line-height:1.65;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:32px 36px;overflow:hidden;white-space:pre-wrap}
+  .hl{color:var(--warn);font-weight:700}
+  .note{font-size:21px;color:var(--muted);margin-top:26px;max-width:52ch;line-height:1.5}
+  .claimline{font-size:46px;line-height:1.34;letter-spacing:-.02em;font-weight:600;max-width:26ch}
+  /* Burned-in caption bar */
+  #cap{position:absolute;left:0;right:0;bottom:0;height:170px;display:flex;
+    align-items:center;justify-content:center;padding:0 120px;
+    background:linear-gradient(to top,rgba(0,0,0,.93),rgba(0,0,0,.75) 62%,transparent)}
+  #capText{font-size:33px;line-height:1.4;text-align:center;max-width:34ch;font-weight:550;
+    text-shadow:0 2px 14px rgba(0,0,0,.95)}
+  #bar{position:absolute;top:0;left:0;height:3px;background:var(--accent);width:0}
+  #hud{position:absolute;top:18px;right:26px;font-family:var(--mono);font-size:15px;
+    color:var(--muted)}
+  #splash{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:var(--bg);z-index:5;text-align:center}
+  #splash p{color:var(--muted);font-size:23px;margin-top:22px;line-height:1.6}
+  kbd{font-family:var(--mono);background:var(--panel);border:1px solid var(--line);
+    border-radius:6px;padding:3px 9px;font-size:19px}
+  #count{font-size:190px;font-weight:700;letter-spacing:-.05em}
+  /* !important is load-bearing: every element this class is applied to (#splash,
+     #cap, #bar, #hud) is targeted by an ID selector, which outranks a bare class.
+     Without it the splash never clears and the H/C shortcuts do nothing. */
+  .hide{display:none !important}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bar"></div>
+  <div id="scene"></div>
+  <div id="cap"><div id="capText"></div></div>
+  <div id="hud">0:00</div>
+  <div id="splash">
+    <h1>Rescind</h1>
+    <p>
+      Press <kbd>Space</kbd> to play. A 3-2-1 countdown gives you time to start recording.<br>
+      <kbd>R</kbd> restart &nbsp;·&nbsp; <kbd>H</kbd> hide progress bar &nbsp;·&nbsp; <kbd>C</kbd> hide captions<br><br>
+      Read each caption as it appears and you are automatically in sync.<br>
+      Where the caption is blank, say nothing — the visual carries that beat.
+    </p>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="timeline.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D = window.RESCIND_DATA, TL = window.RESCIND_TIMELINE;
+const CUES = TL.cues, TOTAL = CUES[CUES.length-1].start + CUES[CUES.length-1].dur;
+
+function fit(){
+  const s = Math.min(innerWidth/1600, innerHeight/900);
+  $('#stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener('resize', fit); fit();
+
+const gone = new Set(D.retraction.retracted_fact_ids);
+const facts = D.before.facts;
+
+function factsHtml(struck, cls){
+  return `<ul class="${cls||''}">` + facts.map(f => {
+    const out = struck && gone.has(f.id);
+    return `<li class="${out?'gone':''}">
+      <span class="tag">${f.kind==='derived'?'concluded':'observed'}</span>
+      <div><div class="claim">${esc(f.claim)}</div>
+      <div class="src">${esc(f.source)}</div>
+      ${out?'<span class="struck">retracted</span>':''}</div></li>`;
+  }).join('') + '</ul>';
+}
+
+const SCENES = {
+  lot: () => `<div class="eyebrow">Staged shipment · ${esc(D.shipment.shipment_id)}</div>
+    <div class="card"><div class="grid">
+      <div><span>Lot</span><b>${esc(D.lot.lot_id)}</b></div>
+      <div><span>Product</span><b>${esc(D.lot.product_name)}</b></div>
+      <div><span>Supplier</span><b>${esc(D.lot.supplier)}</b></div>
+      <div><span>Destination</span><b>${esc(D.shipment.destination)}</b></div>
+      <div><span>Units</span><b>${D.shipment.units.toLocaleString()}</b></div>
+      <div><span>Status</span><b>Staged for release</b></div>
+    </div></div>`,
+
+  memory: () => `<div class="eyebrow">What the agent remembers about this lot</div>${factsHtml(false)}`,
+
+  release: () => `<div class="eyebrow">The agent was asked</div>
+    <h2>${esc(D.before.decision.question)}</h2>
+    <div class="row"><span class="pill ok">release</span>
+      <span class="src" style="font-size:21px">${D.before.decision.supporting.length} live supporting memories
+      · threshold ${D.thresholds.min_supporting_facts} within distance ${D.thresholds.max_supporting_distance}</span></div>`,
+
+  recall: () => `<div class="eyebrow">3:00 PM · Northvale Dairy Co-op</div>
+    <h1 style="color:var(--accent);max-width:24ch;line-height:1.15">Recall notice: lot ${esc(D.lot.lot_id)}</h1>
+    <div class="note" style="font-size:24px;max-width:60ch">${esc(D.retraction.reason)}</div>`,
+
+  cascade: () => `<div class="eyebrow">Blast radius — one serializable transaction</div>
+    <div class="big">
+      <div><b>${D.retraction.facts_retracted}</b><span>memories retracted</span></div>
+      <div><b>${D.retraction.cascade_beyond_roots}</b><span>conclusions pulled down by cascade</span></div>
+      <div><b>${D.retraction.decisions_flagged}</b><span>decision flagged for review</span></div>
+    </div>
+    ${factsHtml(true,'compact')}`,
+
+  refused: () => `<div class="eyebrow">The identical question, asked again</div>
+    <h2>${esc(D.after.decision.question)}</h2>
+    <div class="row"><span class="pill no">refused</span>
+      <span class="pill flag">needs human review</span></div>
+    <div class="note" style="max-width:64ch;font-size:23px">${esc(D.after.decision.rationale)}</div>`,
+
+  replay: () => `<div class="eyebrow">Proof of what the agent knew — AS OF SYSTEM TIME</div>
+    <pre style="font-size:20px">hybrid logical clock ${esc(D.replay.decided_hlc)}</pre>
+    <div class="cols">
+      <div><h3>Knew when it said “release”</h3><ul>
+        ${D.replay.knew_then.map(f=>`<li>${esc(f.claim)}</li>`).join('')}</ul></div>
+      <div><h3>Knows now</h3><ul>
+        ${D.replay.knows_now.map(f=>`<li>${esc(f.claim)}</li>`).join('')}</ul></div>
+    </div>`,
+
+  hold: () => SCENES.replay(),
+
+  index: () => `<div class="eyebrow">Why retracted memory is unreachable, not filtered</div>
+    <pre>CREATE VECTOR INDEX facts_live_by_lot
+  ON facts (lot_id, <span class="hl">retracted</span>, embedding);
+
+SELECT id, claim FROM facts
+ WHERE lot_id = $1 AND <span class="hl">retracted = false</span>
+ ORDER BY embedding &lt;-&gt; $2;</pre>
+    <div class="note" style="max-width:70ch">CockroachDB will not use a vector index unless every
+    prefix column is equality-constrained. You cannot write the fast query and forget
+    the filter, because the filter is what makes the query fast.</div>`,
+
+  receipt: () => `<div class="eyebrow">Verified on every push</div>
+    <h2 style="max-width:24ch">Every test runs against a real CockroachDB cluster.</h2>
+    <pre style="font-size:22px">${esc(D.recorded_from.cockroachdb_version.split('(')[0].trim())}
+no database mocks anywhere in the suite
+receipt committed to ci/latest.json</pre>`,
+
+  close: () => `<div class="eyebrow">Who buys this, and against which budget line</div>
+    <div class="card"><div class="grid" style="grid-template-columns:repeat(2,1fr)">
+      <div><span>Buyer</span><b>Director of Quality Assurance</b></div>
+      <div><span>Budget line</span><b>FSMA 204 — FDA Food Traceability Rule</b></div>
+      <div><span>Compliance date</span><b>20 July 2028</b></div>
+      <div><span>Vertical</span><b>Food &amp; pharmaceutical distribution</b></div>
+    </div></div>`,
+
+  claim: () => `<h1 style="font-size:52px;margin-bottom:34px">Rescind</h1>
+    <div class="claimline">When a lot is recalled, Rescind pulls back every conclusion
+    the agent built on it — in one transaction, with proof of what the agent knew
+    before and after.</div>`,
+
+  end: () => `<div style="text-align:center;width:100%">
+    <h1>Rescind</h1>
+    <p class="note" style="margin:26px auto 0;text-align:center;font-size:26px">
+    github.com/phazon2/rescind</p></div>`,
+};
+
+let t0 = null, raf = null, paused = 0, lastScene = null, started = false;
+
+function render(now){
+  const cue = CUES.filter(c => now >= c.start).pop() || CUES[0];
+  if (cue.scene !== lastScene){
+    lastScene = cue.scene;
+    const el = $('#scene');
+    el.className = 'fade'; el.innerHTML = SCENES[cue.scene] ? SCENES[cue.scene]() : '';
+    void el.offsetWidth;
+  }
+  const active = CUES.find(c => now >= c.start && now < c.start + c.dur);
+  $('#capText').textContent = active ? active.text : '';
+  $('#bar').style.width = (100 * Math.min(now / TOTAL, 1)) + '%';
+  $('#hud').textContent = `${Math.floor(now/60)}:${String(Math.floor(now%60)).padStart(2,'0')} / ${Math.floor(TOTAL/60)}:${String(Math.floor(TOTAL%60)).padStart(2,'0')}`;
+}
+
+function loop(ts){
+  if (t0 === null) t0 = ts;
+  const now = (ts - t0)/1000;
+  render(now);
+  if (now < TOTAL) raf = requestAnimationFrame(loop);
+}
+
+function countdown(n){
+  const sp = $('#splash');
+  sp.classList.remove('hide');
+  sp.innerHTML = `<div id="count">${n}</div>`;
+  if (n === 0){ sp.classList.add('hide'); t0 = null; raf = requestAnimationFrame(loop); return; }
+  setTimeout(() => countdown(n-1), 1000);
+}
+
+function start(){ if (started) return; started = true; countdown(3); }
+function restart(){ cancelAnimationFrame(raf); started = false; lastScene = null;
+  $('#scene').innerHTML=''; $('#capText').textContent=''; $('#bar').style.width=0;
+  $('#splash').classList.remove('hide'); $('#splash').innerHTML =
+    `<h1>Rescind</h1><p>Press <kbd>Space</kbd> to play again.</p>`; }
+
+addEventListener('keydown', e => {
+  if (e.code === 'Space'){ e.preventDefault(); started ? null : start(); }
+  if (e.key === 'r' || e.key === 'R') restart();
+  if (e.key === 'h' || e.key === 'H'){ $('#bar').classList.toggle('hide'); $('#hud').classList.toggle('hide'); }
+  if (e.key === 'c' || e.key === 'C') $('#cap').classList.toggle('hide');
+});
+addEventListener('click', () => started || start());
+</script>
+</body>
+</html>

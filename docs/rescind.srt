@@ -1,0 +1,139 @@
+1
+00:00:00,000 --> 00:00:04,500
+At 3:00 PM, Northvale Dairy Co-op recalls a lot of infant formula.
+
+2
+00:00:04,500 --> 00:00:10,000
+At 3:04, the agent tells the distribution centre it's fine to ship 4,800 tins.
+
+3
+00:00:10,000 --> 00:00:14,000
+The agent isn't broken. It's remembering a certificate that no longer exists.
+
+4
+00:00:14,000 --> 00:00:17,000
+This is the agent's memory of that lot.
+
+5
+00:00:17,000 --> 00:00:21,500
+Three things it observed. Three conclusions it built on top of them.
+
+6
+00:00:21,500 --> 00:00:26,500
+Every memory store on the market can write these. Not one of them can take one back.
+
+7
+00:00:26,500 --> 00:00:30,000
+Retraction needs transactions, foreign keys, and time travel.
+
+8
+00:00:30,000 --> 00:00:35,000
+No vector database has any of the three. CockroachDB has all three.
+
+9
+00:00:35,000 --> 00:00:38,000
+Right now, the agent says: release.
+
+10
+00:00:42,000 --> 00:00:44,500
+One certificate withdrawn.
+
+11
+00:00:44,500 --> 00:00:48,000
+Two conclusions built on it came down with it.
+
+12
+00:00:48,000 --> 00:00:52,000
+One decision already given to a human, flagged for review.
+
+13
+00:00:52,000 --> 00:00:56,000
+One transaction. All of it, or none of it.
+
+14
+00:00:56,000 --> 00:00:59,500
+Same lot. Same question. Asked again.
+
+15
+00:00:59,500 --> 00:01:02,000
+The agent refuses.
+
+16
+00:01:02,000 --> 00:01:05,000
+Not because a model changed its mind.
+
+17
+00:01:05,000 --> 00:01:10,500
+Because it can now find only one live supporting memory, and the threshold is two.
+
+18
+00:01:10,500 --> 00:01:15,500
+Retraction didn't hide a row. It changed what the agent is able to conclude.
+
+19
+00:01:15,500 --> 00:01:19,000
+And it can still prove what it used to know.
+
+20
+00:01:19,000 --> 00:01:21,500
+This is not a reconstruction.
+
+21
+00:01:21,500 --> 00:01:25,000
+The decision stored the cluster's hybrid logical clock,
+
+22
+00:01:25,000 --> 00:01:29,500
+so this reads the exact snapshot the agent read at 3:04.
+
+23
+00:01:37,500 --> 00:01:41,000
+One detail, because it is why this works at all.
+
+24
+00:01:41,000 --> 00:01:47,000
+The retracted flag is a computed column, and a prefix column of the vector index.
+
+25
+00:01:47,000 --> 00:01:52,500
+CockroachDB will not use a vector index unless every prefix column is constrained.
+
+26
+00:01:52,500 --> 00:01:56,500
+So every single search is forced to say: retracted = false.
+
+27
+00:01:56,500 --> 00:02:00,500
+Retracted memory isn't filtered out. It is unreachable.
+
+28
+00:02:00,500 --> 00:02:05,000
+Every test runs against a real CockroachDB cluster, on every push.
+
+29
+00:02:05,000 --> 00:02:09,500
+No database mocks. The behaviour only exists in CockroachDB.
+
+30
+00:02:11,000 --> 00:02:16,500
+The buyer is a director of quality assurance at a food or pharma distributor.
+
+31
+00:02:16,500 --> 00:02:21,500
+The budget line is FSMA 204. Compliance date: July 20th, 2028.
+
+32
+00:02:21,500 --> 00:02:25,000
+They cannot deploy an agent into a recall workflow today,
+
+33
+00:02:25,000 --> 00:02:30,000
+because they cannot prove what it knew, and cannot take back what it learned.
+
+34
+00:02:30,000 --> 00:02:35,500
+When a lot is recalled, Rescind pulls back every conclusion the agent built on it -
+
+35
+00:02:35,500 --> 00:02:41,000
+in one transaction, with proof of what the agent knew before and after.
