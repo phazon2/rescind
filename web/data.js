@@ -1,4 +1,4 @@
-{
+window.RESCIND_DATA = {
   "recorded_from": {
     "note": "Every value on this page was produced by scripts/record_demo.py running against a real CockroachDB cluster in CI. Nothing here is illustrative.",
     "cockroachdb_version": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
@@ -274,4 +274,4 @@
       "child": "c00c4a8e-ace6-4e3f-bb62-049e934a8636"
     }
   ]
-}
+};
