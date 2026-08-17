@@ -74,7 +74,7 @@ when it decided that?*, and *pull this back, and everything built on it.* The
 incumbent keeps the recall-and-ranking business it is good at; Rescind becomes
 the system of record for what may still be believed.
 
-**Verified, not asserted:** 13 of 13 tests pass against a real CockroachDB
+**Verified, not asserted:** 19 of 19 tests pass against a real CockroachDB
 v25.3.0 cluster on every push, with no database mocks anywhere — the behaviour
 under test only exists in CockroachDB, so mocking it would certify nothing. The
 machine-readable receipt is committed at `ci/latest.json`, and 5 of 6 assumption
@@ -85,36 +85,60 @@ plainly in the README and in `docs/LIMITS.md`.
 
 ## Which CockroachDB tools did you use, and what did the agent actually do with them?
 
-**Exercised, with committed evidence:**
+**Two of the four listed tools, both meaningfully integrated — with the evidence.**
 
-- **Distributed vector indexing.** Two vector indexes on `facts`. The critical one
-  is `facts_live_by_lot (lot_id, retracted, embedding)` — the retraction flag is a
-  *prefix column*, which is what makes retracted memory unreachable rather than
-  merely filtered. L2 (`<->`) throughout, since only L2 is index-accelerated.
-  `ci/probe.json` records the `EXPLAIN` plan naming that index in use.
-- **Serializable transactions + foreign keys.** The retraction cascade: one
-  transaction containing the `WITH RECURSIVE` closure over the `fact_edges`
-  lineage graph, the retraction, the decision flagging, and the audit write. A
-  test rolls back mid-retraction and asserts no fact, no flag and no audit row
-  survives.
-- **MVCC time travel.** `AS OF SYSTEM TIME` pinned to
-  `cluster_logical_timestamp()` for exact decision replay.
-- **Computed columns, partial indexes, arrays, CHECK constraints.** The STORED
-  computed `retracted` column; a partial index on the review queue; UUID arrays
-  holding each retraction's blast radius; and a `CHECK` constraint enforcing
-  non-empty provenance in the database, so a writer that bypasses the library
-  still cannot create an unattributable memory.
-- **MCP.** `rescind/mcp_server.py` exposes four tools — `rescind_retrieve`,
-  `rescind_replay`, `rescind_recall_lot`, `rescind_open_reviews`.
+**1. Distributed Vector Indexing.** Two vector indexes on the `facts` table. The
+critical one is `facts_live_by_lot (lot_id, retracted, embedding)`, where the
+retraction flag is a **prefix column**. CockroachDB will not use a vector index
+unless every prefix column is equality-constrained, so every semantic retrieval
+is forced to declare `retracted = false`. That is what makes retracted memory
+*unreachable* rather than merely filtered — you cannot write the fast query and
+forget the filter, because the filter is what makes the query fast. L2 (`<->`)
+throughout, since only L2 is index-accelerated. `ci/probe.json` records the
+`EXPLAIN` plan naming that index in use on a live cluster.
 
-**Not exercised, stated plainly:** CockroachDB Cloud, the Managed MCP Server, and
-the `ccloud` CLI. The build environment allowed outbound port 443 only, so the
-CockroachDB SQL port (26257) was unreachable and the binary download host was
-blocked by egress policy. Verification therefore runs against a single-node
-CockroachDB v25.3.0 cluster started inside GitHub Actions. The control-plane work
-is scripted in `scripts/ccloud_setup.sh` — provision, describe, non-root SQL user,
-backup configuration, audit log — and labelled as not yet executed rather than
-listed as done.
+**2. Agent Skills Repo.** Installed with
+`npx skills add cockroachlabs/cockroachdb-skills` — 34 skills, each pinned by
+content hash in `skills-lock.json` — and used to audit this codebase. This was
+not decoration; it found real defects:
+
+- The `designing-application-transactions` skill's retry guidance surfaced that
+  the retraction transaction had **no client-side retry**. CockroachDB runs
+  SERIALIZABLE with optimistic concurrency and can abort any transaction with
+  SQLSTATE 40001. Without retry, a concurrent writer touching the same lot could
+  make a recall silently fail — leaving conclusions standing on facts the system
+  had already disowned, which is the exact condition this project exists to
+  prevent. `rescind/retry.py` (exponential backoff, idempotent under replay,
+  deferring to an enclosing transaction rather than retrying a savepoint against
+  a stale snapshot) and its six tests exist because of that audit.
+- The same skill flagged `SELECT *`, now replaced with explicit column
+  projections.
+
+Rescind contributes back rather than only consuming: it ships a spec-conformant
+skill of its own at `skills/retracting-agent-memory/SKILL.md`, encoding the
+retractable-memory design so any agent framework can apply it.
+
+**Also used, though not among the four:** serializable transactions and foreign
+keys (the `WITH RECURSIVE` cascade over the lineage graph, with a test that rolls
+back mid-retraction and asserts no fact, no flag and no audit row survives);
+`AS OF SYSTEM TIME` MVCC time travel pinned to `cluster_logical_timestamp()`; and
+computed columns, partial indexes, UUID arrays and `CHECK` constraints for the
+audit and provenance layer.
+
+**On MCP, stated precisely:** `rescind/mcp_server.py` implements an MCP server
+exposing four tools (`rescind_retrieve`, `rescind_replay`, `rescind_recall_lot`,
+`rescind_open_reviews`). This is *Rescind's own* MCP server — it is **not**
+CockroachDB's Cloud Managed MCP Server, which requires a Cloud cluster. We do not
+claim that one.
+
+**Not exercised:** CockroachDB Cloud, the Managed MCP Server, and the `ccloud`
+CLI. The build environment allowed outbound port 443 only, so the CockroachDB SQL
+port (26257) was unreachable and the binary download host was blocked by egress
+policy. Verification therefore runs against a single-node CockroachDB v25.3.0
+cluster started inside GitHub Actions. The control-plane work is scripted in
+`scripts/ccloud_setup.sh` — provision, describe, non-root SQL user, backup
+configuration, audit log — and labelled as not yet executed rather than listed as
+done.
 
 ## Which AWS services did you use, and what did the agent actually do with them?
 
@@ -168,6 +192,16 @@ Bedrock (Titan, Claude) · Python 3.11 · psycopg 3 · MCP · GitHub Actions
 - **Demo:** https://phazon2.github.io/rescind/
 - **CI receipt:** https://github.com/phazon2/rescind/blob/main/ci/latest.json
 - **Limits, in full:** https://github.com/phazon2/rescind/blob/main/docs/LIMITS.md
+- **Architecture diagram:** https://github.com/phazon2/rescind/blob/main/docs/architecture.svg
+
+## Build disclosure (required by the rules)
+
+Every line in this repository was written during the submission period; no
+pre-existing code was incorporated. Built with AI coding assistance (Claude
+Code), which the rules expressly permit. Third-party dependencies: psycopg,
+boto3, pytest, and the CockroachDB Agent Skills repo (Apache-2.0), consumed via
+`npx skills add` and not vendored. Licensed MIT, with the LICENSE file at the
+repository root so it is detected in the About section.
 
 ## Hackathon
 
