@@ -5,6 +5,8 @@ it — in one transaction, with proof of what the agent knew before and after.**
 
 ---
 
+![Architecture: the agent, AWS Bedrock, and CockroachDB as the memory layer](docs/architecture.svg)
+
 ## The problem
 
 A food or pharmaceutical distributor has until **20 July 2028** to comply with
@@ -124,7 +126,7 @@ thing a judge can know.
 **Verified on a real CockroachDB v25.3.0 cluster** (`ci/latest.json`, regenerated
 by GitHub Actions on every push):
 
-- **13 of 13 tests pass.** No database mocks anywhere in the suite — the
+- **19 of 19 tests pass.** No database mocks anywhere in the suite — the
   behaviour under test only exists in CockroachDB, so mocking it would certify
   nothing.
 - **5 of 6 assumption probes hold** (`ci/probe.json`): the vector-index cluster
@@ -180,7 +182,7 @@ rescind/
 │   ├── 000_bootstrap.sql #   the vector-index cluster setting (applied tolerantly)
 │   ├── 001_schema.sql    #   7 tables, 2 vector indexes, the computed column
 │   └── 002_seed.sql      #   the lot and the staged shipment
-├── tests/                # 13 tests, all against a real cluster, no DB mocks
+├── tests/                # 19 tests, all against a real cluster, no DB mocks
 ├── scripts/              # operational entry points
 │   ├── apply_schema.py   #   idempotent schema application
 │   ├── probe_cockroach.py#   turns each assumption into an observation
@@ -211,7 +213,7 @@ export RESCIND_OFFLINE=1          # omit if you have Bedrock access
 python scripts/apply_schema.py    # 7 tables, 2 vector indexes
 python scripts/probe_cockroach.py # confirm the assumptions on your cluster
 python scripts/seed.py            # the Northvale recall scenario
-pytest -v                         # 13 tests against your cluster
+pytest -v                         # 19 tests against your cluster
 python scripts/record_demo.py     # release -> cascade -> refusal -> replay
 ```
 
@@ -269,20 +271,41 @@ What happens when things go wrong is the design, not an afterthought:
 Built for the **CockroachDB × AWS Hackathon — Build with Agentic Memory**
 (cockroachdb-ai.devpost.com), by Diego Radrigan ([@phazon2](https://github.com/phazon2)), solo.
 
-**CockroachDB surfaces used.** Distributed vector indexing (two indexes, with the
-computed `retracted` column as a prefix — verified in use by `EXPLAIN`);
-serializable transactions and foreign keys (the retraction cascade);
-`AS OF SYSTEM TIME` MVCC time travel pinned to `cluster_logical_timestamp()`
-(exact replay); computed columns, partial indexes, arrays and `CHECK` constraints
-(the audit and provenance layer); and an MCP endpoint implemented in
-`rescind/mcp_server.py`. **Not exercised:** CockroachDB Cloud, the Managed MCP
-Server and the `ccloud` CLI — no Cloud cluster was reachable from the build
-environment; `scripts/ccloud_setup.sh` holds the commands, unrun.
+**CockroachDB tools used — two of the four, both meaningfully:**
+
+1. **Distributed Vector Indexing.** Two vector indexes on `facts`. The critical
+   one carries the computed `retracted` column as a *prefix*, which is what makes
+   retracted memory unreachable rather than filtered. `ci/probe.json` records the
+   `EXPLAIN` plan naming that index in use on a live cluster.
+2. **Agent Skills Repo.** Installed with
+   `npx skills add cockroachlabs/cockroachdb-skills` — 34 skills, pinned by
+   content hash in `skills-lock.json` — and used to audit this codebase. The
+   `designing-application-transactions` skill found a real defect: the retraction
+   transaction had no client-side retry, so under SERIALIZABLE a concurrent
+   writer could abort a recall and it would simply fail. `rescind/retry.py` and
+   `tests/test_retry.py` exist because of that audit. It also flagged `SELECT *`,
+   now replaced with explicit projections. Rescind ships a spec-conformant skill
+   back: `skills/retracting-agent-memory/SKILL.md`.
+
+Alongside those: serializable transactions and foreign keys (the cascade),
+`AS OF SYSTEM TIME` pinned to `cluster_logical_timestamp()` (exact replay), and
+computed columns, partial indexes, arrays and `CHECK` constraints (audit and
+provenance). `rescind/mcp_server.py` speaks MCP so other memory stores can query
+Rescind — note this is *our own* MCP server, not CockroachDB's Cloud Managed MCP
+Server. **Not exercised:** CockroachDB Cloud, the Managed MCP Server and the
+`ccloud` CLI — no Cloud cluster was reachable from the build environment;
+`scripts/ccloud_setup.sh` holds those commands, unrun.
 
 **AWS surfaces used.** Bedrock is integrated in `rescind/bedrock.py` for both
 Titan embeddings and Claude reasoning, including strict verdict parsing that fails
 closed. **Not exercised against live AWS:** the build environment's credentials
 were rejected by STS, so every recorded value uses the deterministic offline
 stand-in, and the demo page says so on its face.
+
+**Build disclosure.** Every line in this repository was written during the
+submission period. No pre-existing code was incorporated. It was built with AI
+coding assistance (Claude Code), which the rules expressly permit; the
+third-party dependencies are psycopg, boto3 and pytest, plus the CockroachDB
+Agent Skills repo (Apache-2.0) consumed as described above and not vendored here.
 
 License: MIT.
