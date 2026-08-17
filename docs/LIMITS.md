@@ -181,3 +181,19 @@ README answers that, and this file records the gap between "used" and
 - Any integration that could not be exercised from the build environment is
   named as such in the README rather than being quietly listed. Read the
   integration table there with this section beside it.
+
+## The demo page is a recording, not a live service
+
+`web/index.html` renders `web/data.js`, which `scripts/record_demo.py` generated
+by running the real scenario against a real CockroachDB cluster in CI. Every id,
+hybrid logical clock, distance and count on that page came from that run.
+
+It is nonetheless a **recording**. Clicking the recall button does not execute a
+transaction against a live cluster; it advances the page between two states that
+were both captured from one. The reason is that no publicly reachable cluster
+existed to point a live demo at, and a live demo backed by nothing would have
+been worse than an honest recording. The page says so in its own footer.
+
+To run the same scenario live against your own cluster:
+`python scripts/record_demo.py` with `RESCIND_DATABASE_URL` set — it performs
+exactly the operations the page depicts.

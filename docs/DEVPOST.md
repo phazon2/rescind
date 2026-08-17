@@ -146,6 +146,13 @@ Bedrock (Titan, Claude) · Python 3.11 · psycopg 3 · MCP · GitHub Actions
 
 ## Links
 
+> **Check the demo link before pasting it.** `https://phazon2.github.io/rescind/`
+> only goes live once GitHub Pages is switched on: **Settings → Pages → Build and
+> deployment → Source: "GitHub Actions"**, then re-run the `pages` workflow. Open
+> the URL and confirm it renders before submitting — a 404 on the demo link is
+> worse than no demo link. Until it is live, `web/index.html` in the repository
+> renders correctly when opened directly from disk, and that is a usable fallback.
+
 - **Repository:** https://github.com/phazon2/rescind
 - **Demo:** https://phazon2.github.io/rescind/
 - **CI receipt:** https://github.com/phazon2/rescind/blob/main/ci/latest.json
