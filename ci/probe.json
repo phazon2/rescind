@@ -22,14 +22,14 @@
     {
       "probe": "hlc_and_time_travel",
       "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
-      "supported": false,
-      "detail": "UndefinedTable: relation \"lots\" does not exist"
+      "supported": true,
+      "detail": "snapshot read at hlc 1786974564207775058.0000000000"
     },
     {
       "probe": "vector_index_used_by_retrieval",
       "claim": "The retrieval query plan actually uses facts_live_by_lot",
-      "supported": false,
-      "detail": "UndefinedTable: relation \"facts\" does not exist"
+      "supported": true,
+      "detail": "plan uses facts_live_by_lot"
     },
     {
       "probe": "titan_embedding_dimensions",
