@@ -68,6 +68,9 @@ jobs:
           cockroach sql --insecure -e "SELECT 1" >/dev/null
           cockroach sql --insecure -e "CREATE DATABASE IF NOT EXISTS rescind"
 
+      - name: Minimal SQL repro harness
+        run: python scripts/smoke_sql.py
+
       - name: Probe CockroachDB assumptions
         run: python scripts/probe_cockroach.py
 
@@ -88,9 +91,12 @@ jobs:
           echo "RESCIND_RUN_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
           python scripts/ci_receipt.py || true
 
-      - name: Show cluster log on failure
+      - name: Show cluster errors on failure
         if: failure()
-        run: tail -100 cockroach.log || true
+        run: |
+          # Only the error lines: a full cluster-log dump buries the traceback
+          # that actually explains the failure.
+          grep -iE '\b(error|panic|fatal)\b' cockroach.log | tail -20 || echo "no cluster-level errors"
 
       - name: Commit the receipt
         if: always() && github.event_name == 'push'
@@ -99,7 +105,10 @@ jobs:
           rm -f ci/junit.xml
           git config user.name "rescind-ci"
           git config user.email "ci@rescind.invalid"
-          git add -f ci/latest.json ci/probe.json 2>/dev/null || true
+          # Added individually: git add fails as a whole if any pathspec is missing.
+          for f in ci/latest.json ci/probe.json; do
+            [ -f "$f" ] && git add -f "$f"
+          done
           if git diff --cached --quiet; then
             echo "receipt unchanged"
           else
