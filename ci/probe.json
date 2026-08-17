@@ -23,7 +23,7 @@
       "probe": "hlc_and_time_travel",
       "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
       "supported": true,
-      "detail": "snapshot read at hlc 1786975756972110948.0000000000"
+      "detail": "snapshot read at hlc 1787000554705627173.0000000000"
     },
     {
       "probe": "vector_index_used_by_retrieval",
