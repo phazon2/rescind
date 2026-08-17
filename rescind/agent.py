@@ -145,7 +145,7 @@ def _record(
             conn.executemany(
                 """
                 INSERT INTO decision_support (decision_id, fact_id, distance)
-                VALUES (%s, %s, %s)
+                VALUES (%s::UUID, %s::UUID, %s)
                 """,
                 [(row["id"], r.id, r.distance) for r in supporting],
             )

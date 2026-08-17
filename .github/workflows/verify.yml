@@ -78,13 +78,23 @@ jobs:
       - name: Probe CockroachDB assumptions
         run: python scripts/probe_cockroach.py
 
+      # Seed and test are continue-on-error so their output is always captured and
+      # committed below; the "Verification result" step re-imposes the failure.
       - name: Seed the recall scenario
-        run: python scripts/seed.py
+        id: seed
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mkdir -p ci
+          python scripts/seed.py 2>&1 | tee ci/run-seed.log
 
       - name: Run the test suite against the real cluster
+        id: tests
+        continue-on-error: true
         run: |
+          set -o pipefail
           mkdir -p ci
-          pytest -v --junitxml=ci/junit.xml
+          pytest -v --junitxml=ci/junit.xml 2>&1 | tee ci/run-tests.log
 
       - name: Build the CI receipt
         if: always()
@@ -109,8 +119,11 @@ jobs:
           git config user.name "rescind-ci"
           git config user.email "ci@rescind.invalid"
           # Added individually: git add fails as a whole if any pathspec is missing.
-          for f in ci/latest.json ci/probe.json; do
-            [ -f "$f" ] && git add -f "$f"
+          for f in ci/latest.json ci/probe.json ci/run-seed.log ci/run-tests.log; do
+            if [ -f "$f" ]; then
+              tail -200 "$f" > "$f.trimmed" && mv "$f.trimmed" "$f"
+              git add -f "$f"
+            fi
           done
           if git diff --cached --quiet; then
             echo "receipt unchanged"
@@ -118,3 +131,14 @@ jobs:
             git commit -m "ci: verification receipt for ${GITHUB_SHA::7} [skip ci]"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
+
+      - name: Verification result
+        if: always()
+        run: |
+          echo "seed:  ${{ steps.seed.outcome }}"
+          echo "tests: ${{ steps.tests.outcome }}"
+          if [ "${{ steps.seed.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
+            echo "verification failed"
+            exit 1
+          fi
+          echo "verification passed against CockroachDB ${CRDB_VERSION}"

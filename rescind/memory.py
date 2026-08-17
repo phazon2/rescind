@@ -152,7 +152,9 @@ def derive_fact(
             conn, lot_id, claim, source, embedding, kind="derived"
         )
         conn.executemany(
-            "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s, %s)",
+            # Explicit ::UUID casts: psycopg sends Python strings as text, and a
+            # text parameter is not implicitly assignable to a UUID column.
+            "INSERT INTO fact_edges (parent_id, child_id) VALUES (%s::UUID, %s::UUID)",
             [(pid, fact_id) for pid in dict.fromkeys(parent_ids)],
         )
     return fact_id
@@ -394,7 +396,7 @@ _SUPPORT_SQL = """
 SELECT f.id, f.claim, f.source, f.kind, s.distance
 FROM decision_support AS s
 JOIN facts AS f ON f.id = s.fact_id
-WHERE s.decision_id = %s AND f.retracted = false
+WHERE s.decision_id = %s::UUID AND f.retracted = false
 ORDER BY s.distance
 """
 
@@ -432,7 +434,7 @@ def replay(conn: psycopg.Connection, decision_id: str) -> ReplayReport:
         """
         SELECT id, question, verdict, rationale, decided_hlc, needs_review,
                review_reason
-        FROM decisions WHERE id = %s
+        FROM decisions WHERE id = %s::UUID
         """,
         (decision_id,),
     ).fetchone()

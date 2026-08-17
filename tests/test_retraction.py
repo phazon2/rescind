@@ -146,7 +146,7 @@ def test_retraction_flags_decisions_without_reversing_them(conn):
     assert receipt.flagged_decision_ids == [decision.id]
 
     row = conn.execute(
-        "SELECT verdict, needs_review, review_reason FROM decisions WHERE id = %s",
+        "SELECT verdict, needs_review, review_reason FROM decisions WHERE id = %s::UUID",
         (decision.id,),
     ).fetchone()
     assert row["verdict"] == "release", "the agent must not silently reverse a decision"
@@ -186,7 +186,7 @@ def test_retraction_is_all_or_nothing(conn):
     assert conn.execute("SELECT count(*) AS n FROM retractions").fetchone()["n"] == 0
 
     assert conn.execute(
-        "SELECT needs_review FROM decisions WHERE id = %s", (decision.id,)
+        "SELECT needs_review FROM decisions WHERE id = %s::UUID", (decision.id,)
     ).fetchone()["needs_review"] is False
 
 
@@ -202,7 +202,7 @@ def test_retraction_writes_an_audit_row(conn):
     )
 
     row = conn.execute(
-        "SELECT * FROM retractions WHERE id = %s", (receipt.retraction_id,)
+        "SELECT * FROM retractions WHERE id = %s::UUID", (receipt.retraction_id,)
     ).fetchone()
     assert row["facts_retracted"] == 2
     assert row["actor"] == "d.radrigan"
