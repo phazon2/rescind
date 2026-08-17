@@ -122,8 +122,10 @@ jobs:
           # word buries the Python traceback that actually explains the failure.
           grep -E '^[EF][0-9]{6}' cockroach.log | tail -15 || echo "no cluster-level errors"
 
+      # Only main commits receipts. When every branch did, the two branches
+      # regenerated the same artifacts independently and collided on merge.
       - name: Commit the receipt
-        if: always() && github.event_name == 'push'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
           rm -f ci/junit.xml
