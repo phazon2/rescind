@@ -101,6 +101,14 @@ def _decision_payload(decision):
 def main() -> int:
     query_vec = topic_vector(QUESTION_TOPICS)
 
+    # The question must be embedded in the SAME space as the seeded facts. In
+    # offline mode that space is the topic space in rescind/topics.py, so the
+    # question is embedded with topic weights rather than through the default
+    # lexical stand-in. With AWS credentials both the facts and the question go
+    # through Titan and this override is unnecessary. Stated in docs/LIMITS.md.
+    def demo_embedder(_question: str):
+        return query_vec
+
     with connect() as conn:
         version = list(conn.execute("SELECT version() AS v").fetchone().values())[0]
         lot = conn.execute(
@@ -112,7 +120,7 @@ def main() -> int:
 
         # --- 1. the agent answers -------------------------------------------
         before_facts = _fact_rows(conn)
-        decision = agent.ask(conn, LOT, QUESTION)
+        decision = agent.ask(conn, LOT, QUESTION, embedder=demo_embedder)
         print(f"1. agent answered: {decision.verdict} "
               f"on {len(decision.supporting)} supporting memories")
 
@@ -132,7 +140,7 @@ def main() -> int:
               f"flagged {receipt.decisions_flagged} decision(s)")
 
         # --- 4. the same question, now refused ------------------------------
-        second = agent.ask(conn, LOT, QUESTION)
+        second = agent.ask(conn, LOT, QUESTION, embedder=demo_embedder)
         print(f"3. same question now: {second.verdict}")
 
         # --- 5. time-travel proof -------------------------------------------

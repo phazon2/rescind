@@ -29,7 +29,8 @@ OBSERVATIONS = [
         "key": "coa",
         "claim": (
             "Certificate of Analysis for lot LOT-2026-0619-NV: Cronobacter "
-            "sakazakii not detected in 30 of 30 sampled tins."
+            "sakazakii not detected in 30 of 30 sampled tins; lot passed "
+            "release testing."
         ),
         "source": "Northvale Dairy Co-op QA, CoA #4471, issued 2026-06-24",
         "topics": {"lot_release_safety": 0.95, "microbiological_testing": 0.31},
@@ -38,7 +39,7 @@ OBSERVATIONS = [
         "key": "cold_chain",
         "claim": (
             "Cold chain log for pallet NV-8841 held 2.1-6.8 C across the full "
-            "41-hour transit with no excursions."
+            "41-hour transit with no excursions, within specification throughout."
         ),
         "source": "Carrier telemetry, sensor #NV-9134",
         "topics": {"lot_release_safety": 0.95, "cold_chain": 0.31},
