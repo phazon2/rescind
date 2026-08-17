@@ -223,14 +223,19 @@ function boot(data) {
     D = data;
     render();
     const p = D.recorded_from;
+    // Link by commit SHA, not by branch name: a permalink resolves whichever
+    // branch this was recorded from, and keeps working after a merge or rename.
+    const sha = String(p.commit || 'HEAD');
+    const base = 'https://github.com/phazon2/rescind';
+    const at = (path) => `${base}/blob/${encodeURIComponent(sha)}/${path}`;
     $('#prov').innerHTML =
       `Every value on this page was produced by <code>scripts/record_demo.py</code>
        running against a real cluster: <b>${esc(p.cockroachdb_version.split('(')[0].trim())}</b>,
-       commit <code>${esc(String(p.commit).slice(0, 7))}</code>.
+       commit <code>${esc(sha.slice(0, 7))}</code>.
        Embeddings: ${esc(p.embeddings)}.
-       <a href="https://github.com/phazon2/rescind">Source</a> ·
-       <a href="https://github.com/phazon2/rescind/blob/main/docs/LIMITS.md">Limits</a> ·
-       <a href="https://github.com/phazon2/rescind/blob/main/ci/latest.json">CI receipt</a>`;
+       <a href="${base}">Source</a> ·
+       <a href="${at('docs/LIMITS.md')}">Limits</a> ·
+       <a href="${at('ci/latest.json')}">CI receipt</a>`;
 }
 
 function failed(detail) {

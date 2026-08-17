@@ -146,6 +146,12 @@ Bedrock (Titan, Claude) · Python 3.11 · psycopg 3 · MCP · GitHub Actions
 
 ## Links
 
+> **DO THIS FIRST: merge the work onto `main`.** A judge who opens
+> github.com/phazon2/rescind lands on the default branch. Until the branch
+> `claude/rescind-hackathon-handoff-1qj0lb` is merged, that page shows an almost
+> empty repository and every `blob/main/...` link 404s. This is the single highest-value
+> action on the list.
+>
 > **Check the demo link before pasting it.** `https://phazon2.github.io/rescind/`
 > only goes live once GitHub Pages is switched on: **Settings → Pages → Build and
 > deployment → Source: "GitHub Actions"**, then re-run the `pages` workflow. Open
