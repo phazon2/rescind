@@ -15,6 +15,7 @@ import psycopg
 
 from .config import MAX_SUPPORTING_DISTANCE, RETRIEVE_LIMIT
 from .db import safe_hlc, to_vector
+from .retry import with_retry
 
 VECTOR_CAST = "%s::VECTOR(1024)"
 
@@ -278,6 +279,21 @@ def retract(
         raise ValueError("retract requires a non-empty reason (this is an audit record)")
     reason = reason.strip()
 
+    # CockroachDB is SERIALIZABLE with optimistic concurrency, so this
+    # transaction can be aborted with SQLSTATE 40001 and must be retried by the
+    # client. A recall that gave up because another writer touched the same lot
+    # would leave conclusions standing on disowned facts.
+    return with_retry(conn, lambda: _retract_once(conn, lot_id, roots, reason, actor))
+
+
+def _retract_once(
+    conn: psycopg.Connection,
+    lot_id: str,
+    roots: list[str],
+    reason: str,
+    actor: str,
+) -> RetractionReceipt:
+    """One attempt at the retraction transaction. Safe to replay from the start."""
     with conn.transaction():
         # 1. transitive closure over lineage
         doomed = [

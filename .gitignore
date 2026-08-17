@@ -8,3 +8,9 @@ cockroach.log
 cockroach-data/
 *.tgz
 .env
+
+# Third-party Agent Skills, installed with:
+#   npx skills add cockroachlabs/cockroachdb-skills
+# Apache-2.0, not vendored here. Our own skill lives in skills/.
+.agents/
+.claude/skills/

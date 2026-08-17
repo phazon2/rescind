@@ -202,7 +202,8 @@ def test_retraction_writes_an_audit_row(conn):
     )
 
     row = conn.execute(
-        "SELECT * FROM retractions WHERE id = %s::UUID", (receipt.retraction_id,)
+        "SELECT actor, reason, facts_retracted, decisions_flagged, "
+        "retracted_fact_ids FROM retractions WHERE id = %s::UUID", (receipt.retraction_id,)
     ).fetchone()
     assert row["facts_retracted"] == 2
     assert row["actor"] == "d.radrigan"
