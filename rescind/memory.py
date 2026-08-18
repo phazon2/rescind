@@ -232,20 +232,6 @@ def explain_retrieval(
 # Retraction: the whole point
 # ---------------------------------------------------------------------------
 
-# Transitive descendant closure over the lineage graph. UNION (not UNION ALL)
-# deduplicates, which also makes the walk safe against cycles.
-_DESCENDANTS_SQL = """
-WITH RECURSIVE descendants (id) AS (
-    SELECT unnest(%s::UUID[])
-  UNION
-    SELECT e.child_id
-    FROM fact_edges AS e
-    JOIN descendants AS d ON e.parent_id = d.id
-)
-SELECT id FROM descendants
-"""
-
-
 def retract(
     conn: psycopg.Connection,
     lot_id: str,
@@ -293,53 +279,76 @@ def _retract_once(
     reason: str,
     actor: str,
 ) -> RetractionReceipt:
-    """One attempt at the retraction transaction. Safe to replay from the start."""
+    """One attempt at the retraction transaction. Safe to replay from the start.
+
+    The cascade runs entirely server-side. An earlier version walked the lineage
+    with a SELECT, pulled every descendant id back into Python, and sent them
+    home again inside `id = ANY($1)`. Benchmarking showed that transaction was
+    slow enough at depth to have its read timestamp pushed and fail the refresh,
+    so it exhausted its retry budget: 511 facts committed, 2,047 did not
+    (see ci/scale.json). Driving the UPDATE directly from the recursive CTE keeps
+    the whole closure inside the database and cuts the transaction's lifetime,
+    which is exactly what the `designing-application-transactions` skill
+    prescribes -- push invariants into SQL, prefer set-based operations.
+    """
     with conn.transaction():
         # A recall is the highest-value write in the system: if it contends with
-        # ordinary agent writes, it should win rather than be aborted and retried.
-        # Measured at scale -- without this, a cascade over thousands of facts
-        # exhausted its retry budget (see ci/scale.json).
+        # ordinary agent writes it should win rather than be aborted and retried.
         conn.execute("SET TRANSACTION PRIORITY HIGH")
-        # 1. transitive closure over lineage
-        doomed = [
-            str(r["id"])
-            for r in conn.execute(_DESCENDANTS_SQL, (roots,)).fetchall()
-        ]
 
-        # 2. retract them all. Only rows not already retracted are touched, so a
-        #    replayed recall notice is idempotent rather than rewriting history.
+        # 1 + 2. Walk the lineage and retract the whole closure, in one statement.
+        #        Only rows not already retracted are touched, so a replayed recall
+        #        is idempotent rather than rewriting history.
         newly_retracted = [
             str(r["id"])
             for r in conn.execute(
                 """
+                WITH RECURSIVE descendants (id) AS (
+                    SELECT unnest(%s::UUID[])
+                  UNION
+                    SELECT e.child_id
+                    FROM fact_edges AS e
+                    JOIN descendants AS d ON e.parent_id = d.id
+                )
                 UPDATE facts
                    SET retracted_at = now(), retracted_reason = %s
-                 WHERE id = ANY(%s::UUID[]) AND retracted_at IS NULL
+                 WHERE id IN (SELECT id FROM descendants)
+                   AND retracted_at IS NULL
              RETURNING id
                 """,
-                (reason, doomed),
+                (roots, reason),
             ).fetchall()
         ]
 
-        # 3. flag -- never reverse -- every decision resting on a retracted fact.
+        # 3. Flag -- never reverse -- every decision resting on a retracted fact.
+        #    The closure is recomputed server-side rather than shipped back in,
+        #    which keeps the transaction short.
         flagged = [
             str(r["id"])
             for r in conn.execute(
                 """
+                WITH RECURSIVE descendants (id) AS (
+                    SELECT unnest(%s::UUID[])
+                  UNION
+                    SELECT e.child_id
+                    FROM fact_edges AS e
+                    JOIN descendants AS d ON e.parent_id = d.id
+                )
                 UPDATE decisions
                    SET needs_review = true, review_reason = %s
                  WHERE id IN (
-                           SELECT decision_id FROM decision_support
-                            WHERE fact_id = ANY(%s::UUID[])
+                           SELECT s.decision_id
+                             FROM decision_support AS s
+                            WHERE s.fact_id IN (SELECT id FROM descendants)
                        )
                    AND needs_review = false
              RETURNING id
                 """,
-                (f"supporting memory retracted: {reason}", doomed),
+                (roots, f"supporting memory retracted: {reason}"),
             ).fetchall()
         ]
 
-        # 4. audit row, same transaction as the damage it describes.
+        # 4. Audit row, same transaction as the damage it describes.
         receipt = conn.execute(
             """
             INSERT INTO retractions (
