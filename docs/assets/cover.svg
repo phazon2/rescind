@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640"
+     font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, sans-serif">
+  <rect width="1280" height="640" fill="#12120d"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#c85a5a"/>
+
+  <!-- Left column ends at x=660; the card begins at x=700. Nothing crosses. -->
+  <text x="72" y="126" fill="#f4f4ec" font-size="72" font-weight="700" letter-spacing="-2.4">Rescind</text>
+  <text x="74" y="166" fill="#9a9a8c" font-size="16" font-weight="600" letter-spacing="2.9">MEMORY THAT CAN BE UN-LEARNED</text>
+
+  <text x="72" y="256" fill="#f4f4ec" font-size="30" font-weight="600" letter-spacing="-0.4">When a lot is recalled, Rescind</text>
+  <text x="72" y="294" fill="#f4f4ec" font-size="30" font-weight="600" letter-spacing="-0.4">pulls back every conclusion the</text>
+  <text x="72" y="332" fill="#f4f4ec" font-size="30" font-weight="600" letter-spacing="-0.4">agent built on it — in one</text>
+  <text x="72" y="370" fill="#f4f4ec" font-size="30" font-weight="600" letter-spacing="-0.4">transaction.</text>
+
+  <line x1="72" y1="424" x2="620" y2="424" stroke="#2e2e24" stroke-width="1.5"/>
+  <text x="72"  y="476" fill="#f4f4ec" font-size="42" font-weight="700">3</text>
+  <text x="72"  y="502" fill="#9a9a8c" font-size="14">memories retracted</text>
+  <text x="250" y="476" fill="#f4f4ec" font-size="42" font-weight="700">2</text>
+  <text x="250" y="502" fill="#9a9a8c" font-size="14">pulled down by cascade</text>
+  <text x="470" y="476" fill="#f4f4ec" font-size="42" font-weight="700">1</text>
+  <text x="470" y="502" fill="#9a9a8c" font-size="14">decision flagged</text>
+
+  <text x="72" y="572" fill="#7f7f72" font-size="15">CockroachDB · vector indexing · AS OF SYSTEM TIME · AWS Bedrock</text>
+
+  <!-- The memorable image: the same memory list, three of it struck through. -->
+  <rect x="700" y="86" width="508" height="468" rx="16" fill="#1a1a13" stroke="#2e2e24" stroke-width="1.5"/>
+  <text x="730" y="126" fill="#8f8f80" font-size="12" font-weight="700" letter-spacing="2">WHAT THE AGENT REMEMBERS</text>
+
+  <text x="730" y="176" fill="#6f6f62" font-size="18">Certificate of Analysis — passed</text>
+  <line x1="730" y1="170" x2="1030" y2="170" stroke="#c85a5a" stroke-width="2.5"/>
+  <text x="730" y="199" fill="#c85a5a" font-size="11" font-weight="700" letter-spacing="1.5">RETRACTED</text>
+
+  <text x="730" y="247" fill="#f4f4ec" font-size="18">Cold chain log — within spec</text>
+  <text x="730" y="295" fill="#f4f4ec" font-size="18">Supplier audit — no findings</text>
+  <text x="730" y="343" fill="#f4f4ec" font-size="18">Supplier in good standing</text>
+
+  <text x="730" y="391" fill="#6f6f62" font-size="18">Meets release criteria</text>
+  <line x1="730" y1="385" x2="936" y2="385" stroke="#c85a5a" stroke-width="2.5"/>
+  <text x="730" y="414" fill="#c85a5a" font-size="11" font-weight="700" letter-spacing="1.5">RETRACTED</text>
+
+  <text x="730" y="462" fill="#6f6f62" font-size="18">Cleared for release to DC-7</text>
+  <line x1="730" y1="456" x2="982" y2="456" stroke="#c85a5a" stroke-width="2.5"/>
+  <text x="730" y="485" fill="#c85a5a" font-size="11" font-weight="700" letter-spacing="1.5">RETRACTED</text>
+
+  <text x="730" y="528" fill="#7f7f72" font-size="14">one recall · one serializable transaction</text>
+</svg>

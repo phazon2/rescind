@@ -58,6 +58,13 @@ def main() -> int:
         apply_file(conn, SQL_DIR / "001_schema.sql", strict=True)
         print("  ok")
 
+        # Least-privilege application role. Tolerant: a managed cluster may not
+        # permit CREATE USER, and the schema is still correct without it.
+        print("\napplying sql/003_roles.sql (tolerant)")
+        role_problems = apply_file(conn, SQL_DIR / "003_roles.sql", strict=False)
+        if not role_problems:
+            print("  ok — rescind_app has no DELETE and no UPDATE on retractions")
+
         tables = [
             r["table_name"]
             for r in conn.execute(
