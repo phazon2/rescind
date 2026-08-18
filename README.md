@@ -137,10 +137,13 @@ by GitHub Actions on every push):
 - The full recall scenario end to end: **release → cascade → refusal → time-travel
   proof** (`ci/run-demo.log`).
 - **Scale, measured rather than asserted** (`ci/scale.json`): **8,000 facts**
-  across 200 lots at lineage depth 12, loaded at 235 facts/second. Retrieval at
-  that corpus size runs **p50 5.07 ms / p95 13.07 ms**, and the vector index is
-  confirmed *still in use* at 8,000 rows — it does not quietly stop being used as
-  the corpus grows. The same benchmark sweeps the retraction cascade until it
+  across 200 lots at lineage depth 12, loaded at ~220 facts/second. Retrieval at
+  that corpus size stays in **single-digit milliseconds** — p50 3.46 ms, p95
+  3.76 ms in the run recorded at `ci/scale.json` — and the vector index is
+  confirmed *still in use* at 8,000 rows, so it does not quietly stop being used
+  as the corpus grows. That receipt is regenerated on every push, so the exact
+  latency figures move a little from run to run; the index-still-used result and
+  the cascade ceiling below do not. The same benchmark sweeps the retraction cascade until it
   breaks and records where it broke; that ceiling is stated in
   [`docs/LIMITS.md`](docs/LIMITS.md) rather than omitted, because a system whose
   limits are unknown is not production-ready and one whose limits are published
