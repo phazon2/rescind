@@ -1,8 +1,8 @@
 {
   "what_this_is": "Machine-readable receipt for the most recent verification run. Records what this run observed, not what the tests claim.",
-  "commit": "d9572722e60b081f6c30a6c89d1701b00abeff2f",
+  "commit": "016dc5e03c728d6b2b73847b129c1aed6caabaed",
   "ref": "main",
-  "run_url": "https://github.com/phazon2/rescind/actions/runs/32087581404",
+  "run_url": "https://github.com/phazon2/rescind/actions/runs/32089790823",
   "generated_at_utc": "unknown",
   "cockroachdb": {
     "version": "CockroachDB CCL v25.3.0 (x86_64-pc-linux-gnu, built 2025/08/14 18:25:15, go1.23.7 X:nocoverageredesign)",
@@ -22,14 +22,14 @@
         "test": "test_assert_fact_rejects_empty_provenance",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.053,
+        "seconds": 0.046,
         "message": null
       },
       {
         "test": "test_database_rejects_empty_provenance_too",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.009,
+        "seconds": 0.008,
         "message": null
       },
       {
@@ -43,56 +43,56 @@
         "test": "test_retracted_fact_is_unreachable_by_retrieval",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.027,
+        "seconds": 0.025,
         "message": null
       },
       {
         "test": "test_retraction_cascades_through_lineage",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.047,
+        "seconds": 0.045,
         "message": null
       },
       {
         "test": "test_retraction_flags_decisions_without_reversing_them",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.055,
+        "seconds": 0.048,
         "message": null
       },
       {
         "test": "test_retraction_is_all_or_nothing",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.043,
+        "seconds": 0.048,
         "message": null
       },
       {
         "test": "test_retraction_writes_an_audit_row",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.048,
+        "seconds": 0.036,
         "message": null
       },
       {
         "test": "test_agent_refuses_below_threshold_without_calling_the_model",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.028,
+        "seconds": 0.026,
         "message": null
       },
       {
         "test": "test_retraction_makes_a_previously_answerable_question_unanswerable",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.04,
+        "seconds": 0.037,
         "message": null
       },
       {
         "test": "test_refusal_is_deterministic",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.037,
+        "seconds": 0.038,
         "message": null
       },
       {
@@ -106,14 +106,14 @@
         "test": "test_replay_reads_the_snapshot_the_agent_actually_read",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.045,
+        "seconds": 0.041,
         "message": null
       },
       {
         "test": "test_recognises_serialization_failures",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.014,
+        "seconds": 0.013,
         "message": null
       },
       {
@@ -148,7 +148,7 @@
         "test": "test_retraction_still_commits_normally",
         "certifies": null,
         "status": "passed",
-        "seconds": 0.022,
+        "seconds": 0.025,
         "message": null
       }
     ]
@@ -176,7 +176,7 @@
       "probe": "hlc_and_time_travel",
       "claim": "cluster_logical_timestamp() can pin AS OF SYSTEM TIME to an exact snapshot",
       "supported": true,
-      "detail": "snapshot read at hlc 1787015766528192188.0000000000"
+      "detail": "snapshot read at hlc 1787017987852413904.0000000000"
     },
     {
       "probe": "vector_index_used_by_retrieval",

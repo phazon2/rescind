@@ -1,6 +1,6 @@
 {
   "what_this_is": "Measured behaviour of the CockroachDB memory layer at scale. Every number here was produced by scripts/benchmark_scale.py against a real cluster; none is estimated.",
-  "commit": "d9572722e60b081f6c30a6c89d1701b00abeff2f",
+  "commit": "016dc5e03c728d6b2b73847b129c1aed6caabaed",
   "config": {
     "facts": 8000,
     "lots": 200,
@@ -8,15 +8,15 @@
   },
   "load": {
     "facts": 8000,
-    "seconds": 36.11,
-    "facts_per_second": 221.5
+    "seconds": 31.9,
+    "facts_per_second": 250.8
   },
   "corpus_size": 8000,
   "retrieval_ms": {
     "samples": 60,
-    "p50": 3.46,
-    "p95": 3.76,
-    "max": 7.32
+    "p50": 2.49,
+    "p95": 2.73,
+    "max": 6.21
   },
   "vector_index_used_at_scale": true,
   "cascade_sweep": [
@@ -24,27 +24,27 @@
       "depth": 6,
       "closure_size": 127,
       "facts_retracted": 127,
-      "seconds": 0.841,
+      "seconds": 0.656,
       "single_transaction": true
     },
     {
       "depth": 8,
       "closure_size": 511,
-      "seconds": 25.126,
+      "seconds": 26.143,
       "single_transaction": false,
       "error": "RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied"
     },
     {
       "depth": 10,
       "closure_size": 2047,
-      "seconds": 225.073,
+      "seconds": 143.211,
       "single_transaction": false,
       "error": "RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied"
     },
     {
       "depth": 11,
       "closure_size": 4095,
-      "seconds": 433.945,
+      "seconds": 492.452,
       "single_transaction": false,
       "error": "RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied"
     }
