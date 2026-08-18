@@ -1,4 +1,7 @@
 serialization failure (40001) on attempt 1/5, retrying in 50ms
+serialization failure (40001) on attempt 2/5, retrying in 100ms
+serialization failure (40001) on attempt 3/5, retrying in 200ms
+serialization failure (40001) on attempt 4/5, retrying in 400ms
 serialization failure (40001) on attempt 1/5, retrying in 50ms
 serialization failure (40001) on attempt 2/5, retrying in 100ms
 serialization failure (40001) on attempt 3/5, retrying in 200ms
@@ -9,35 +12,35 @@ serialization failure (40001) on attempt 3/5, retrying in 200ms
 serialization failure (40001) on attempt 4/5, retrying in 400ms
 
 === loading 200 lots ===
-  200 lots in 0.05s
+  200 lots in 0.06s
 
 === bulk-loading 8000 facts with 1024-d vectors ===
   5000/8000...
-  8000 facts in 38.84s (206/s)
+  8000 facts in 44.01s (182/s)
 
 === vector retrieval latency over 8000 live facts ===
-  p50 4.36ms  p95 6.22ms  max 8.66ms
+  p50 2.65ms  p95 3.14ms  max 6.07ms
 
 === query plan at scale ===
   uses facts_live_by_lot: True
 
 === cascade sweep: lineage tree of depth 6 ===
   built 127 facts
-  retracted 127 facts in one transaction, 0.593s
+  retracted 127 facts in one transaction, 0.724s
 
 === cascade sweep: lineage tree of depth 8 ===
   built 511 facts
-  retracted 511 facts in one transaction, 5.283s
+  FAILED after 26.010s: RetryExhausted
 
 === cascade sweep: lineage tree of depth 10 ===
   built 2047 facts
-  FAILED after 69.885s: RetryExhausted
+  FAILED after 224.517s: RetryExhausted
 
 === cascade sweep: lineage tree of depth 11 ===
   built 4095 facts
-  FAILED after 197.367s: RetryExhausted
+  FAILED after 542.302s: RetryExhausted
 
-  largest cascade committed in ONE transaction: 511 facts
-  14142 live, 638 retracted
+  largest cascade committed in ONE transaction: 127 facts
+  14653 live, 127 retracted
 
 wrote /home/runner/work/rescind/rescind/ci/scale.json
