@@ -5,7 +5,7 @@ what the application MUST be able to do:
   [ OK ] SELECT live facts: allowed, as intended
   [ OK ] UPDATE a fact to retracted: allowed, as intended
   [ OK ] INSERT an audit row: allowed, as intended
-  [FAIL] AS OF SYSTEM TIME read: should be allowed but was refused -> relation "facts" does not exist
+  [ OK ] AS OF SYSTEM TIME read: allowed, as intended
 
 what the application MUST NOT be able to do:
   [ OK ] DELETE a fact: refused by the database
@@ -14,7 +14,7 @@ what the application MUST NOT be able to do:
   [ OK ] DELETE a lineage edge: refused by the database
   [ OK ] DROP the facts table: refused by the database
   [ OK ] ALTER the schema: refused by the database
-  [FAIL] CREATE a new table: should have been refused but succeeded
+  [ OK ] CREATE a new table: refused by the database
 
-10/12 privilege checks behaved as specified
+12/12 privilege checks behaved as specified
 wrote /home/runner/work/rescind/rescind/ci/privileges.json

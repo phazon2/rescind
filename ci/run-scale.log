@@ -1,66 +1,43 @@
 serialization failure (40001) on attempt 1/5, retrying in 50ms
+serialization failure (40001) on attempt 1/5, retrying in 50ms
 serialization failure (40001) on attempt 2/5, retrying in 100ms
 serialization failure (40001) on attempt 3/5, retrying in 200ms
 serialization failure (40001) on attempt 4/5, retrying in 400ms
-Traceback (most recent call last):
-  File "/home/runner/work/rescind/rescind/rescind/retry.py", line 81, in with_retry
-    return operation()
-           ^^^^^^^^^^^
-  File "/home/runner/work/rescind/rescind/rescind/memory.py", line 286, in <lambda>
-    return with_retry(conn, lambda: _retract_once(conn, lot_id, roots, reason, actor))
-                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/rescind/rescind/rescind/memory.py", line 297, in _retract_once
-    with conn.transaction():
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/contextlib.py", line 144, in __exit__
-    next(self.gen)
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/connection.py", line 362, in transaction
-    with tx:
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/transaction.py", line 271, in __exit__
-    return self._conn.wait(self._exit_gen(exc_type, exc_val, exc_tb))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/connection.py", line 484, in wait
-    return waiting.wait(gen, self.pgconn.socket, interval=interval)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "psycopg_binary/_psycopg/waiting.pyx", line 241, in psycopg_binary._psycopg.wait_c
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/transaction.py", line 115, in _exit_gen
-    yield from self._commit_gen()
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/transaction.py", line 140, in _commit_gen
-    yield from self._conn._exec_command(command)
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/psycopg/_connection_base.py", line 483, in _exec_command
-    raise e.error_from_result(result, encoding=self.pgconn._encoding)
-psycopg.errors.SerializationFailure: restart transaction: TransactionRetryWithProtoRefreshError: TransactionRetryError: retry txn (RETRY_SERIALIZABLE - failed preemptive refresh): "sql txn" meta={id=244733c6 key=/Table/109/2/"LOT-SCALE-00000"/0/5482520872067661825/0/0 iso=Serializable pri=0.02186131 epo=0 ts=1787010522.241471002,2 min=1787010420.713017041,0 seq=20252} lock=true stat=PENDING rts=1787010420.713017041,0 gul=1787010421.213017041,0 obs={n1@1787010420.713017041,0}
-HINT:  See: https://www.cockroachlabs.com/docs/v25.3/transaction-retry-error-reference.html#retry_serializable
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/runner/work/rescind/rescind/scripts/benchmark_scale.py", line 226, in _guarded
-    return main()
-           ^^^^^^
-  File "/home/runner/work/rescind/rescind/scripts/benchmark_scale.py", line 185, in main
-    receipt = retract(conn, lot, [str(root)], "Scale benchmark: root CoA withdrawn.")
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/rescind/rescind/rescind/memory.py", line 286, in retract
-    return with_retry(conn, lambda: _retract_once(conn, lot_id, roots, reason, actor))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/rescind/rescind/rescind/retry.py", line 97, in with_retry
-    raise RetryExhausted(
-rescind.retry.RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied
+serialization failure (40001) on attempt 1/5, retrying in 50ms
+serialization failure (40001) on attempt 2/5, retrying in 100ms
+serialization failure (40001) on attempt 3/5, retrying in 200ms
+serialization failure (40001) on attempt 4/5, retrying in 400ms
 
 === loading 200 lots ===
   200 lots in 0.05s
 
 === bulk-loading 8000 facts with 1024-d vectors ===
   5000/8000...
-  8000 facts in 36.19s (221/s)
+  8000 facts in 38.84s (206/s)
 
 === vector retrieval latency over 8000 live facts ===
-  p50 4.95ms  p95 9.91ms  max 15.14ms
+  p50 4.36ms  p95 6.22ms  max 8.66ms
 
 === query plan at scale ===
   uses facts_live_by_lot: True
 
-=== building a lineage chain 12 deep ===
-  4094 lineage edges, 4095 facts in the transitive closure
+=== cascade sweep: lineage tree of depth 6 ===
+  built 127 facts
+  retracted 127 facts in one transaction, 0.593s
 
-=== retracting the root — one serializable transaction ===
+=== cascade sweep: lineage tree of depth 8 ===
+  built 511 facts
+  retracted 511 facts in one transaction, 5.283s
+
+=== cascade sweep: lineage tree of depth 10 ===
+  built 2047 facts
+  FAILED after 69.885s: RetryExhausted
+
+=== cascade sweep: lineage tree of depth 11 ===
+  built 4095 facts
+  FAILED after 197.367s: RetryExhausted
+
+  largest cascade committed in ONE transaction: 511 facts
+  14142 live, 638 retracted
+
+wrote /home/runner/work/rescind/rescind/ci/scale.json

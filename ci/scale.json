@@ -1,0 +1,57 @@
+{
+  "what_this_is": "Measured behaviour of the CockroachDB memory layer at scale. Every number here was produced by scripts/benchmark_scale.py against a real cluster; none is estimated.",
+  "commit": "e75d5017b0ee55e4d01f4b138b568c65c42daf05",
+  "config": {
+    "facts": 8000,
+    "lots": 200,
+    "chain_depth": 12
+  },
+  "load": {
+    "facts": 8000,
+    "seconds": 38.84,
+    "facts_per_second": 206.0
+  },
+  "corpus_size": 8000,
+  "retrieval_ms": {
+    "samples": 60,
+    "p50": 4.36,
+    "p95": 6.22,
+    "max": 8.66
+  },
+  "vector_index_used_at_scale": true,
+  "cascade_sweep": [
+    {
+      "depth": 6,
+      "closure_size": 127,
+      "facts_retracted": 127,
+      "seconds": 0.593,
+      "single_transaction": true
+    },
+    {
+      "depth": 8,
+      "closure_size": 511,
+      "facts_retracted": 511,
+      "seconds": 5.283,
+      "single_transaction": true
+    },
+    {
+      "depth": 10,
+      "closure_size": 2047,
+      "seconds": 69.885,
+      "single_transaction": false,
+      "error": "RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied"
+    },
+    {
+      "depth": 11,
+      "closure_size": 4095,
+      "seconds": 197.367,
+      "single_transaction": false,
+      "error": "RetryExhausted: transaction still hitting serialization failures after 5 attempts; the operation was NOT applied"
+    }
+  ],
+  "largest_single_transaction_cascade": 511,
+  "after_cascade": {
+    "live": 14142,
+    "retracted": 638
+  }
+}
