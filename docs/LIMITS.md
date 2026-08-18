@@ -159,10 +159,23 @@ of a too-strict threshold is an agent that refuses to answer anything useful.
   escalation, no notification, no SLA, and no way to record that a human cleared
   a flagged decision. `open_reviews()` shows the queue; nothing closes it.
 - **One recall scenario is seeded.** `sql/002_seed.sql` and `scripts/seed.py`
-  build a single lot with three observations and three derived conclusions. This
-  is a demonstration, not a load test. No benchmark of cascade cost against a
-  large lineage graph has been run, and `WITH RECURSIVE` over a wide graph is
-  the obvious place where this design would first hurt.
+  build a single lot with three observations and three derived conclusions. That
+  is a demonstration, not a load test — `scripts/benchmark_scale.py` is the load
+  test, and it is where the next bullet's numbers come from.
+- **The retraction cascade has a measured ceiling, and it is not large.**
+  `scripts/benchmark_scale.py` grows a synthetic lineage graph and sweeps the
+  cascade until a single transaction can no longer commit it. `ci/scale.json`
+  records where that happened on the CI runner: a closure of **127 facts
+  committed in one transaction; 511 exhausted the retry budget and was not
+  applied.** `WITH RECURSIVE` over a wide graph is exactly where this design
+  hurts first, which was the prediction, now measured instead of guessed.
+
+  The failure mode is at least the safe one: `RetryExhausted` is raised, nothing
+  is applied, and no partial retraction lands — the all-or-nothing property holds
+  even at the ceiling. But a recall whose blast radius exceeds it would have to
+  be split into several transactions, and **Rescind does not split it for you**.
+  That is the single largest piece of engineering standing between this and a
+  production deployment.
 - **FSMA 204 is cited as the budget line, not as a compliance claim.** Rescind
   is not a validated compliance system, has not been assessed against 21 CFR
   Part 11, and would not satisfy an FDA audit as built. The compliance date is

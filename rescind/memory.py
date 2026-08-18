@@ -285,11 +285,16 @@ def _retract_once(
     with a SELECT, pulled every descendant id back into Python, and sent them
     home again inside `id = ANY($1)`. Benchmarking showed that transaction was
     slow enough at depth to have its read timestamp pushed and fail the refresh,
-    so it exhausted its retry budget: 511 facts committed, 2,047 did not
-    (see ci/scale.json). Driving the UPDATE directly from the recursive CTE keeps
-    the whole closure inside the database and cuts the transaction's lifetime,
-    which is exactly what the `designing-application-transactions` skill
-    prescribes -- push invariants into SQL, prefer set-based operations.
+    so it exhausted its retry budget instead of committing. Driving the UPDATE
+    directly from the recursive CTE keeps the whole closure inside the database
+    and cuts the transaction's lifetime, which is exactly what the
+    `designing-application-transactions` skill prescribes -- push invariants into
+    SQL, prefer set-based operations.
+
+    This shape still has a ceiling: one transaction covers one bounded closure.
+    scripts/benchmark_scale.py sweeps until it breaks and ci/scale.json records
+    where, so the limit is measured and published rather than left to be
+    discovered in production. See docs/LIMITS.md.
     """
     with conn.transaction():
         # A recall is the highest-value write in the system: if it contends with

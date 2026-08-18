@@ -136,6 +136,21 @@ by GitHub Actions on every push):
   `facts_live_by_lot`.
 - The full recall scenario end to end: **release → cascade → refusal → time-travel
   proof** (`ci/run-demo.log`).
+- **Scale, measured rather than asserted** (`ci/scale.json`): **8,000 facts**
+  across 200 lots at lineage depth 12, loaded at 235 facts/second. Retrieval at
+  that corpus size runs **p50 5.07 ms / p95 13.07 ms**, and the vector index is
+  confirmed *still in use* at 8,000 rows — it does not quietly stop being used as
+  the corpus grows. The same benchmark sweeps the retraction cascade until it
+  breaks and records where it broke; that ceiling is stated in
+  [`docs/LIMITS.md`](docs/LIMITS.md) rather than omitted, because a system whose
+  limits are unknown is not production-ready and one whose limits are published
+  is.
+- **Access control, executed as the application role** (`ci/privileges.json`):
+  **12 of 12 checks pass** as the least-privilege `rescind_app` role. It holds
+  **no DELETE privilege anywhere and no UPDATE on `retractions`**, so the audit
+  trail is insert-only *at the privilege level rather than by convention*. It
+  cannot DROP, ALTER or CREATE. (CockroachDB grants CREATE on `public` by
+  default; the check caught that, and it was revoked.)
 
 **Not verified, and why:**
 
@@ -149,7 +164,9 @@ by GitHub Actions on every push):
   was blocked by egress policy. Verification therefore runs against a
   single-node cluster in CI. `ccloud` control-plane commands are scripted in
   `scripts/ccloud_setup.sh` but have **not** been executed.
-- Nothing has been observed multi-node, under partition, or at scale.
+- Nothing has been observed **multi-node or under partition**. Scale was measured
+  on a single node; the claims about serializability and MVCC snapshots rest on
+  CockroachDB's guarantees rather than on our own testing of them across nodes.
 
 Everything else is in [`docs/LIMITS.md`](docs/LIMITS.md), which is complete
 rather than flattering.
