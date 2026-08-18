@@ -1,6 +1,6 @@
 {
   "what_this_is": "Access-control evidence. Every row was executed against a live cluster as the least-privilege rescind_app role from sql/003_roles.sql.",
-  "commit": "e75d5017b0ee55e4d01f4b138b568c65c42daf05",
+  "commit": "f59ac8b461701b04271fea487b8a52dfb8646ed1",
   "role": "rescind_app",
   "headline": "The application role holds no DELETE privilege anywhere and no UPDATE on retractions, so the audit trail is insert-only at the privilege level rather than by convention.",
   "checks_passed": 12,
