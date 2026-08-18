@@ -175,7 +175,18 @@ jobs:
             echo "receipt unchanged"
           else
             git commit -m "ci: verification receipt for ${GITHUB_SHA::7} [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            # The branch may have moved while this run was executing (a push
+            # during a multi-minute benchmark). Rebase onto it and retry rather
+            # than losing the receipt to a non-fast-forward rejection.
+            for attempt in 1 2 3; do
+              if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                echo "receipt pushed"; break
+              fi
+              echo "push rejected (attempt $attempt), rebasing onto the branch"
+              git fetch origin "${GITHUB_REF_NAME}"
+              git rebase "origin/${GITHUB_REF_NAME}" || { git rebase --abort; exit 1; }
+              sleep 3
+            done
           fi
 
       - name: Verification result
