@@ -12,33 +12,33 @@ serialization failure (40001) on attempt 3/5, retrying in 200ms
 serialization failure (40001) on attempt 4/5, retrying in 400ms
 
 === loading 200 lots ===
-  200 lots in 0.05s
+  200 lots in 0.06s
 
 === bulk-loading 8000 facts with 1024-d vectors ===
   5000/8000...
-  8000 facts in 34.04s (235/s)
+  8000 facts in 36.11s (222/s)
 
 === vector retrieval latency over 8000 live facts ===
-  p50 5.07ms  p95 13.07ms  max 23.9ms
+  p50 3.46ms  p95 3.76ms  max 7.32ms
 
 === query plan at scale ===
   uses facts_live_by_lot: True
 
 === cascade sweep: lineage tree of depth 6 ===
   built 127 facts
-  retracted 127 facts in one transaction, 0.691s
+  retracted 127 facts in one transaction, 0.841s
 
 === cascade sweep: lineage tree of depth 8 ===
   built 511 facts
-  FAILED after 22.084s: RetryExhausted
+  FAILED after 25.126s: RetryExhausted
 
 === cascade sweep: lineage tree of depth 10 ===
   built 2047 facts
-  FAILED after 197.489s: RetryExhausted
+  FAILED after 225.073s: RetryExhausted
 
 === cascade sweep: lineage tree of depth 11 ===
   built 4095 facts
-  FAILED after 499.353s: RetryExhausted
+  FAILED after 433.945s: RetryExhausted
 
   largest cascade committed in ONE transaction: 127 facts
   14653 live, 127 retracted
